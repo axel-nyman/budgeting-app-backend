@@ -1,4 +1,4 @@
-# User Management Spring Boot Application
+# REST API Spring Boot Application
 
 This is a domain-centric Spring Boot application that follows clean architecture principles, implementing a REST API backend for a personal budgeting app.
 
@@ -43,7 +43,7 @@ The application follows the domain-centric architecture pattern with clear separ
    docker-compose up -d
    ```
 
-## API Endpoints
+## Example API Endpoints (not actual endpoints)
 
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
