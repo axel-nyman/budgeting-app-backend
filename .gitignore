@@ -5,6 +5,11 @@ logs/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### CLAUDE ###
+.claude/
+.claude-*
+CLAUDE.md
+
 ### STS ###
 .apt_generated
 .classpath
