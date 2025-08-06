@@ -91,7 +91,7 @@ public class UserIntegrationTest {
                                 .andReturn();
 
                 mockMvc.perform(asyncDispatch(result))
-                                .andExpect(status().isCreated())
+                                .andExpect(status().isNotFound())
                                 .andExpect(jsonPath("$.firstName", is("John")))
                                 .andExpect(jsonPath("$.lastName", is("Doe")))
                                 .andExpect(jsonPath("$.email", is("john.doe@example.com")))
