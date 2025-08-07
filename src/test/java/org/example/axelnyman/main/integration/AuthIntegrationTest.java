@@ -13,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -26,10 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
 import org.example.axelnyman.main.domain.model.User;
+import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 
@@ -94,14 +93,9 @@ public class AuthIntegrationTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "John", "Doe", "john.doe@example.com", "password123");
 
-        MvcResult result = mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(request().asyncStarted())
-                .andExpect(request().asyncResult(notNullValue()))
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message", is("User registered successfully")))
                 .andExpect(jsonPath("$.user.firstName", is("John")))
@@ -121,27 +115,25 @@ public class AuthIntegrationTest {
 
         // Verify household was created
         assertThat(householdRepository.count(), is(1L));
-        var household = householdRepository.findById(savedUser.getHouseholdId()).orElseThrow();
+        var household = householdRepository.findById(savedUser.getHousehold().getId()).orElseThrow();
         assertThat(household.getName(), is("John Doe's Household"));
     }
 
     @Test
     void shouldNotRegisterUserWithDuplicateEmail() throws Exception {
         // Create existing user
-        User existingUser = new User("Jane", "Doe", "jane.doe@example.com", "hashedPassword", 1L);
+        Household household = new Household("Existing Household");
+        Household savedHousehold = householdRepository.save(household);
+        
+        User existingUser = new User("Jane", "Doe", "jane.doe@example.com", "hashedPassword", savedHousehold);
         userRepository.save(existingUser);
 
         RegisterUserRequest request = new RegisterUserRequest(
                 "John", "Doe", "jane.doe@example.com", "password123");
 
-        MvcResult result = mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(request().asyncStarted())
-                .andExpect(request().asyncResult(notNullValue()))
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", containsString("already exists")))
                 .andExpect(jsonPath("$.details.email[0]", is("Email already exists")));

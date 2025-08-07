@@ -30,8 +30,9 @@ public final class User {
     @Column(nullable = false)
     private String hashedPassword;
 
-    @Column(name = "household_id")
-    private Long householdId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "household_id")
+    private Household household;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -59,12 +60,12 @@ public final class User {
     }
 
     // Constructor for full user creation with password and household
-    public User(String firstName, String lastName, String email, String hashedPassword, Long householdId) {
+    public User(String firstName, String lastName, String email, String hashedPassword, Household household) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.hashedPassword = hashedPassword;
-        this.householdId = householdId;
+        this.household = household;
     }
 
     // Getters and Setters
@@ -132,12 +133,12 @@ public final class User {
         this.hashedPassword = hashedPassword;
     }
 
-    public Long getHouseholdId() {
-        return householdId;
+    public Household getHousehold() {
+        return household;
     }
 
-    public void setHouseholdId(Long householdId) {
-        this.householdId = householdId;
+    public void setHousehold(Household household) {
+        this.household = household;
     }
 
     public LocalDateTime getDeletedAt() {

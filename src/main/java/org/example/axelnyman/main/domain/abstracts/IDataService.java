@@ -2,25 +2,29 @@ package org.example.axelnyman.main.domain.abstracts;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
 
+/**
+ * Data Access Service - Responsible for direct database operations
+ * This service provides a clean abstraction over repository operations
+ * and should not contain business logic.
+ */
 public interface IDataService {
-    CompletableFuture<User> saveUser(User user);
+    User saveUser(User user);
 
-    CompletableFuture<Optional<User>> getUserById(Long id);
+    Optional<User> getUserById(Long id);
 
-    CompletableFuture<List<User>> getAllUsers();
+    List<User> getAllUsers();
 
-    CompletableFuture<Boolean> deleteUserById(Long id);
+    boolean deleteUserById(Long id);
 
-    CompletableFuture<Boolean> userExistsByEmail(String email);
+    boolean userExistsByEmail(String email);
 
-    CompletableFuture<Boolean> userExistsByEmailIncludingDeleted(String email);
+    boolean userExistsByEmailIncludingDeleted(String email);
 
-    CompletableFuture<Household> saveHousehold(Household household);
+    Household saveHousehold(Household household);
 
-    CompletableFuture<Optional<Household>> getHouseholdById(Long id);
+    Optional<Household> getHouseholdById(Long id);
 }

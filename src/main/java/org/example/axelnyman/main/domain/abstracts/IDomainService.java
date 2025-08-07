@@ -2,14 +2,18 @@ package org.example.axelnyman.main.domain.abstracts;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
 
+/**
+ * Domain Service - Responsible for general business operations
+ * This service handles CRUD operations, data transformations, and business rules
+ * that apply across the application domain.
+ */
 public interface IDomainService {
-    CompletableFuture<Optional<UserResponse>> getUserById(Long id);
+    Optional<UserResponse> getUserById(Long id);
 
-    CompletableFuture<List<UserResponse>> getAllUsers();
+    List<UserResponse> getAllUsers();
 
-    CompletableFuture<Boolean> deleteUser(Long id);
+    boolean deleteUser(Long id);
 }

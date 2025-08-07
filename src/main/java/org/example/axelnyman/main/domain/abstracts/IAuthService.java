@@ -3,8 +3,11 @@ package org.example.axelnyman.main.domain.abstracts;
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
 
-import java.util.concurrent.CompletableFuture;
-
+/**
+ * Authentication Service - Responsible for authentication and user lifecycle operations
+ * This service handles user registration, login, password management, and other
+ * authentication-specific business logic.
+ */
 public interface IAuthService {
-    CompletableFuture<UserRegistrationResponse> registerUser(RegisterUserRequest request);
+    UserRegistrationResponse registerUser(RegisterUserRequest request);
 }

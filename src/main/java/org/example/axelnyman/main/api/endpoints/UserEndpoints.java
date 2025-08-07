@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
@@ -18,26 +17,24 @@ public class UserEndpoints {
         this.domainService = domainService;
     }
 
-
     @GetMapping("/users/{id}")
-    public CompletableFuture<ResponseEntity<UserResponse>> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         return domainService.getUserById(id)
-                .thenApply(optionalUser -> optionalUser
-                        .map(user -> ResponseEntity.ok(user))
-                        .orElse(ResponseEntity.notFound().build()));
+                .map(user -> ResponseEntity.ok(user))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/users")
-    public CompletableFuture<ResponseEntity<List<UserResponse>>> getAllUsers() {
-        return domainService.getAllUsers()
-                .thenApply(users -> ResponseEntity.ok(users));
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = domainService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     @DeleteMapping("/users/{id}")
-    public CompletableFuture<ResponseEntity<Void>> deleteUser(@PathVariable Long id) {
-        return domainService.deleteUser(id)
-                .thenApply(deleted -> deleted
-                        ? ResponseEntity.noContent().<Void>build()
-                        : ResponseEntity.notFound().<Void>build());
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = domainService.deleteUser(id);
+        return deleted
+                ? ResponseEntity.noContent().<Void>build()
+                : ResponseEntity.notFound().<Void>build();
     }
 }

@@ -11,8 +11,6 @@ import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
-
 @Service
 public class AuthService implements IAuthService {
 
@@ -25,42 +23,39 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public CompletableFuture<UserRegistrationResponse> registerUser(RegisterUserRequest request) {
-        return dataService.userExistsByEmailIncludingDeleted(request.email())
-                .thenCompose(exists -> {
-                    if (exists) {
-                        throw new DuplicateEmailException("User with email " + request.email() + " already exists");
-                    }
+    public UserRegistrationResponse registerUser(RegisterUserRequest request) {
+        boolean exists = dataService.userExistsByEmailIncludingDeleted(request.email());
+        if (exists) {
+            throw new DuplicateEmailException("User with email " + request.email() + " already exists");
+        }
 
-                    // Create household first
-                    String householdName = request.firstName() + " " + request.lastName() + "'s Household";
-                    Household household = new Household(householdName);
+        // Create household first
+        String householdName = request.firstName() + " " + request.lastName() + "'s Household";
+        Household household = new Household(householdName);
+        Household savedHousehold = dataService.saveHousehold(household);
 
-                    return dataService.saveHousehold(household)
-                            .thenCompose(savedHousehold -> {
-                                // Create user with hashed password and household reference
-                                String hashedPassword = passwordEncoder.encode(request.password());
-                                User user = new User(
-                                        request.firstName(),
-                                        request.lastName(),
-                                        request.email(),
-                                        hashedPassword,
-                                        savedHousehold.getId()
-                                );
+        // Create user with hashed password and household reference
+        String hashedPassword = passwordEncoder.encode(request.password());
+        User user = new User(
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                hashedPassword,
+                savedHousehold
+        );
 
-                                return dataService.saveUser(user)
-                                        .thenApply(savedUser -> new UserRegistrationResponse(
-                                                "User registered successfully",
-                                                new UserRegistrationData(
-                                                        savedUser.getId(),
-                                                        savedUser.getFirstName(),
-                                                        savedUser.getLastName(),
-                                                        savedUser.getEmail(),
-                                                        savedUser.getHouseholdId(),
-                                                        savedUser.getCreatedAt()
-                                                )
-                                        ));
-                            });
-                });
+        User savedUser = dataService.saveUser(user);
+        
+        return new UserRegistrationResponse(
+                "User registered successfully",
+                new UserRegistrationData(
+                        savedUser.getId(),
+                        savedUser.getFirstName(),
+                        savedUser.getLastName(),
+                        savedUser.getEmail(),
+                        savedUser.getHousehold().getId(),
+                        savedUser.getCreatedAt()
+                )
+        );
     }
 }

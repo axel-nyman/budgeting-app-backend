@@ -20,11 +20,11 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import org.example.axelnyman.main.domain.model.User;
+import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
-import org.springframework.test.web.servlet.MvcResult;
+import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -53,6 +53,9 @@ public class UserIntegrationTest {
         @Autowired
         private UserRepository userRepository;
 
+        @Autowired
+        private HouseholdRepository householdRepository;
+
         private MockMvc mockMvc;
 
         @BeforeEach
@@ -63,6 +66,7 @@ public class UserIntegrationTest {
                                 .build();
 
                 userRepository.deleteAll();
+                householdRepository.deleteAll();
         }
 
         @AfterAll
@@ -74,20 +78,18 @@ public class UserIntegrationTest {
 
         @Test
         void shouldGetUserById() throws Exception {
+                Household household = new Household("Test Household");
+                Household savedHousehold = householdRepository.save(household);
+                
                 User user = new User(
                                 "John",
                                 "Doe",
                                 "john.doe@example.com",
                                 "hashedPassword123",
-                                1L);
+                                savedHousehold);
                 User savedUser = userRepository.save(user);
 
-                MvcResult result = mockMvc.perform(get("/api/users/" + savedUser.getId()))
-                                .andExpect(request().asyncStarted())
-                                .andExpect(request().asyncResult(notNullValue()))
-                                .andReturn();
-
-                mockMvc.perform(asyncDispatch(result))
+                mockMvc.perform(get("/api/users/" + savedUser.getId()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id", is(savedUser.getId().intValue())))
                                 .andExpect(jsonPath("$.email", is("john.doe@example.com")));
@@ -95,49 +97,48 @@ public class UserIntegrationTest {
 
         @Test
         void shouldGetAllUsers() throws Exception {
+                Household household1 = new Household("Test Household 1");
+                Household savedHousehold1 = householdRepository.save(household1);
+                
+                Household household2 = new Household("Test Household 2");
+                Household savedHousehold2 = householdRepository.save(household2);
+                
                 User user1 = new User(
                                 "John",
                                 "Doe",
                                 "john.doe@example.com",
                                 "hashedPassword123",
-                                1L);
+                                savedHousehold1);
 
                 User user2 = new User(
                                 "Jane",
                                 "Smith",
                                 "jane.smith@example.com",
                                 "hashedPassword456",
-                                2L);
+                                savedHousehold2);
 
                 userRepository.save(user1);
                 userRepository.save(user2);
 
-                MvcResult result = mockMvc.perform(get("/api/users"))
-                                .andExpect(request().asyncStarted())
-                                .andExpect(request().asyncResult(notNullValue()))
-                                .andReturn();
-
-                mockMvc.perform(asyncDispatch(result))
+                mockMvc.perform(get("/api/users"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$", hasSize(2)));
         }
 
         @Test
         void shouldDeleteUser() throws Exception {
+                Household household = new Household("Test Household");
+                Household savedHousehold = householdRepository.save(household);
+                
                 User user = new User(
                                 "John",
                                 "Doe",
                                 "john.doe@example.com",
                                 "hashedPassword123",
-                                1L);
+                                savedHousehold);
                 User savedUser = userRepository.save(user);
 
-                MvcResult result = mockMvc.perform(delete("/api/users/" + savedUser.getId()))
-                                .andExpect(request().asyncStarted())
-                                .andExpect(request().asyncResult(notNullValue()))
-                                .andReturn();
-
-                mockMvc.perform(asyncDispatch(result))
+                mockMvc.perform(delete("/api/users/" + savedUser.getId()))
                                 .andExpect(status().isNoContent());
 
         }
