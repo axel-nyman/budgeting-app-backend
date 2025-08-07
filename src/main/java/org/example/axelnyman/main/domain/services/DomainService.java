@@ -6,9 +6,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
-import org.example.axelnyman.main.domain.dtos.UserDtos.*;
+import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
 import org.example.axelnyman.main.domain.extensions.DomainExtensions;
-import org.example.axelnyman.main.domain.model.User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,20 +17,6 @@ public class DomainService implements IDomainService {
 
     public DomainService(IDataService dataService) {
         this.dataService = dataService;
-    }
-
-    @Override
-    public CompletableFuture<UserResponse> createUser(CreateUserRequest request) {
-        return dataService.userExistsByEmail(request.email())
-                .thenCompose(exists -> {
-                    if (exists) {
-                        throw new IllegalArgumentException("User with email " + request.email() + " already exists");
-                    }
-
-                    User user = DomainExtensions.toEntity(request);
-                    return dataService.saveUser(user);
-                })
-                .thenApply(DomainExtensions::toResponse);
     }
 
     @Override

@@ -27,6 +27,15 @@ public final class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String hashedPassword;
+
+    @Column(name = "household_id")
+    private Long householdId;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -47,6 +56,15 @@ public final class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+    }
+
+    // Constructor for full user creation with password and household
+    public User(String firstName, String lastName, String email, String hashedPassword, Long householdId) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.hashedPassword = hashedPassword;
+        this.householdId = householdId;
     }
 
     // Getters and Setters
@@ -104,5 +122,29 @@ public final class User {
 
     public void setBankAccounts(Set<BankAccount> bankAccounts) {
         this.bankAccounts = bankAccounts;
+    }
+
+    public String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
+    }
+
+    public Long getHouseholdId() {
+        return householdId;
+    }
+
+    public void setHouseholdId(Long householdId) {
+        this.householdId = householdId;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

@@ -1,11 +1,7 @@
 package org.example.axelnyman.main.api.endpoints;
 
-import jakarta.validation.Valid;
-
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
-import org.example.axelnyman.main.domain.dtos.UserDtos.CreateUserRequest;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,17 +18,6 @@ public class UserEndpoints {
         this.domainService = domainService;
     }
 
-    @PostMapping("/users/register")
-    public CompletableFuture<ResponseEntity<UserResponse>> register(@Valid @RequestBody CreateUserRequest request) {
-        CompletableFuture<UserResponse> response = domainService.createUser(request);
-        return response.thenApply(userResponse -> ResponseEntity.status(HttpStatus.CREATED).body(userResponse))
-                .exceptionally(ex -> {
-                    if (ex.getCause() instanceof IllegalArgumentException) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                    }
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-                });
-    }
 
     @GetMapping("/users/{id}")
     public CompletableFuture<ResponseEntity<UserResponse>> getUserById(@PathVariable Long id) {

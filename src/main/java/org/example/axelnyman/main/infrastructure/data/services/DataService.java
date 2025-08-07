@@ -5,7 +5,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.example.axelnyman.main.domain.abstracts.IDataService;
+import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
+import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -14,9 +16,11 @@ import org.springframework.stereotype.Service;
 public class DataService implements IDataService {
 
     private final UserRepository userRepository;
+    private final HouseholdRepository householdRepository;
 
-    public DataService(UserRepository userRepository) {
+    public DataService(UserRepository userRepository, HouseholdRepository householdRepository) {
         this.userRepository = userRepository;
+        this.householdRepository = householdRepository;
     }
 
     @Override
@@ -53,5 +57,23 @@ public class DataService implements IDataService {
             }
             return false;
         });
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<Boolean> userExistsByEmailIncludingDeleted(String email) {
+        return CompletableFuture.completedFuture(userRepository.existsByEmailIncludingDeleted(email));
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<Household> saveHousehold(Household household) {
+        return CompletableFuture.completedFuture(householdRepository.save(household));
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<Optional<Household>> getHouseholdById(Long id) {
+        return CompletableFuture.completedFuture(householdRepository.findById(id));
     }
 }
