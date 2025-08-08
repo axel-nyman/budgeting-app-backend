@@ -8,7 +8,10 @@ import jakarta.validation.Valid;
 import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
+import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
+import org.example.axelnyman.main.shared.exceptions.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +47,27 @@ public class AuthController {
             details.put("email", new String[] { "Email already exists" });
             errorResponse.put("details", details);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Login user", description = "Authenticate user with email and password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
+    public ResponseEntity<Object> login(@Valid @RequestBody LoginDto loginDto) {
+        try {
+            AuthResponseDto response = authService.login(loginDto);
+            return ResponseEntity.ok(response);
+        } catch (InvalidCredentialsException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "An unexpected error occurred");

@@ -27,10 +27,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
+import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
+import org.example.axelnyman.main.infrastructure.security.JwtTokenProvider;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -67,6 +72,9 @@ public class AuthIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     private MockMvc mockMvc;
 
@@ -169,6 +177,137 @@ public class AuthIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    // Login Tests
+
+    @Test
+    void shouldLoginWithValidCredentials() throws Exception {
+        // Create test user
+        Household household = new Household("Test Household");
+        Household savedHousehold = householdRepository.save(household);
+        
+        String rawPassword = "password123";
+        String hashedPassword = passwordEncoder.encode(rawPassword);
+        User user = new User("John", "Doe", "john.doe@example.com", hashedPassword, savedHousehold);
+        User savedUser = userRepository.save(user);
+
+        LoginDto loginDto = new LoginDto("john.doe@example.com", rawPassword);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andExpect(jsonPath("$.user.id", is(savedUser.getId().intValue())))
+                .andExpect(jsonPath("$.user.firstName", is("John")))
+                .andExpect(jsonPath("$.user.lastName", is("Doe")))
+                .andExpect(jsonPath("$.user.email", is("john.doe@example.com")))
+                .andExpect(jsonPath("$.user.householdId", is(savedHousehold.getId().intValue())))
+                .andExpect(jsonPath("$.user.createdAt", notNullValue()));
+    }
+
+    @Test
+    void shouldValidateJwtTokenClaimsAfterLogin() throws Exception {
+        // Create test user
+        Household household = new Household("JWT Test Household");
+        Household savedHousehold = householdRepository.save(household);
+        
+        String rawPassword = "password123";
+        String hashedPassword = passwordEncoder.encode(rawPassword);
+        User user = new User("Jane", "Smith", "jane.smith@example.com", hashedPassword, savedHousehold);
+        User savedUser = userRepository.save(user);
+
+        LoginDto loginDto = new LoginDto("jane.smith@example.com", rawPassword);
+
+        String responseContent = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Extract token and validate claims
+        var responseMap = objectMapper.readValue(responseContent, Map.class);
+        String token = (String) responseMap.get("token");
+        
+        assertTrue(jwtTokenProvider.validateToken(token));
+        assertEquals(savedUser.getId().toString(), jwtTokenProvider.getUserIdFromToken(token));
+        assertEquals(savedHousehold.getId().toString(), jwtTokenProvider.getHouseholdIdFromToken(token));
+        assertEquals("jane.smith@example.com", jwtTokenProvider.getEmailFromToken(token));
+    }
+
+    @Test
+    void shouldReturnUnauthorizedForInvalidEmail() throws Exception {
+        LoginDto loginDto = new LoginDto("nonexistent@example.com", "password123");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error", is("Invalid credentials")));
+    }
+
+    @Test
+    void shouldReturnUnauthorizedForInvalidPassword() throws Exception {
+        // Create test user
+        Household household = new Household("Password Test Household");
+        Household savedHousehold = householdRepository.save(household);
+        
+        String correctPassword = "correctPassword123";
+        String hashedPassword = passwordEncoder.encode(correctPassword);
+        User user = new User("Bob", "Johnson", "bob.johnson@example.com", hashedPassword, savedHousehold);
+        userRepository.save(user);
+
+        LoginDto loginDto = new LoginDto("bob.johnson@example.com", "wrongPassword");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error", is("Invalid credentials")));
+    }
+
+    @Test
+    void shouldNotLoginSoftDeletedUser() throws Exception {
+        // Create test user
+        Household household = new Household("Deleted User Household");
+        Household savedHousehold = householdRepository.save(household);
+        
+        String rawPassword = "password123";
+        String hashedPassword = passwordEncoder.encode(rawPassword);
+        User user = new User("Alice", "Williams", "alice.williams@example.com", hashedPassword, savedHousehold);
+        user.setDeletedAt(LocalDateTime.now()); // Soft delete the user
+        userRepository.save(user);
+
+        LoginDto loginDto = new LoginDto("alice.williams@example.com", rawPassword);
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error", is("Invalid credentials")));
+    }
+
+    @Test
+    void shouldReturnBadRequestForInvalidEmailFormat() throws Exception {
+        LoginDto loginDto = new LoginDto("invalid-email", "password123");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestForMissingFields() throws Exception {
+        LoginDto loginDto = new LoginDto("", "");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isBadRequest());
     }
 }

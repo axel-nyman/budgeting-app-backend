@@ -56,6 +56,11 @@ public class DataService implements IDataService {
     }
 
     @Override
+    public Optional<User> findActiveUserByEmail(String email) {
+        return userRepository.findActiveByEmail(email);
+    }
+
+    @Override
     public Household saveHousehold(Household household) {
         return householdRepository.save(household);
     }

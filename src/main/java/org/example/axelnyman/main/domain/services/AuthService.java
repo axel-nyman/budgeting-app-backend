@@ -5,21 +5,30 @@ import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationData;
+import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
+import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
+import org.example.axelnyman.main.domain.dtos.UserDtos.UserData;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
+import org.example.axelnyman.main.shared.exceptions.InvalidCredentialsException;
+import org.example.axelnyman.main.infrastructure.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthService implements IAuthService {
 
     private final IDataService dataService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthService(IDataService dataService, PasswordEncoder passwordEncoder) {
+    public AuthService(IDataService dataService, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.dataService = dataService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -41,11 +50,10 @@ public class AuthService implements IAuthService {
                 request.lastName(),
                 request.email(),
                 hashedPassword,
-                savedHousehold
-        );
+                savedHousehold);
 
         User savedUser = dataService.saveUser(user);
-        
+
         return new UserRegistrationResponse(
                 "User registered successfully",
                 new UserRegistrationData(
@@ -54,8 +62,38 @@ public class AuthService implements IAuthService {
                         savedUser.getLastName(),
                         savedUser.getEmail(),
                         savedUser.getHousehold().getId(),
-                        savedUser.getCreatedAt()
-                )
-        );
+                        savedUser.getCreatedAt()));
+    }
+
+    @Override
+    public AuthResponseDto login(LoginDto loginDto) {
+        Optional<User> userOptional = dataService.findActiveUserByEmail(loginDto.email());
+
+        if (userOptional.isEmpty()) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+
+        User user = userOptional.get();
+
+        if (!passwordEncoder.matches(loginDto.password(), user.getHashedPassword())) {
+            throw new InvalidCredentialsException("Invalid credentials");
+        }
+
+        // Generate JWT token
+        String token = jwtTokenProvider.generateToken(
+                user.getId(),
+                user.getHousehold().getId(),
+                user.getEmail());
+
+        // Create user data response
+        UserData userData = new UserData(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getHousehold().getId(),
+                user.getCreatedAt());
+
+        return new AuthResponseDto(token, userData);
     }
 }

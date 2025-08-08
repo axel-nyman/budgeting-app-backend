@@ -24,6 +24,8 @@ public interface IDataService {
 
     boolean userExistsByEmailIncludingDeleted(String email);
 
+    Optional<User> findActiveUserByEmail(String email);
+
     Household saveHousehold(Household household);
 
     Optional<Household> getHouseholdById(Long id);
