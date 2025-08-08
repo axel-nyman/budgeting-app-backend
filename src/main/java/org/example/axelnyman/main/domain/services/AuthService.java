@@ -4,10 +4,9 @@ import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationData;
 import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
 import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserData;
+import org.example.axelnyman.main.domain.extensions.AuthExtensions;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
@@ -54,15 +53,7 @@ public class AuthService implements IAuthService {
 
         User savedUser = dataService.saveUser(user);
 
-        return new UserRegistrationResponse(
-                "User registered successfully",
-                new UserRegistrationData(
-                        savedUser.getId(),
-                        savedUser.getFirstName(),
-                        savedUser.getLastName(),
-                        savedUser.getEmail(),
-                        savedUser.getHousehold().getId(),
-                        savedUser.getCreatedAt()));
+        return AuthExtensions.toUserRegistrationResponse(savedUser);
     }
 
     @Override
@@ -85,15 +76,6 @@ public class AuthService implements IAuthService {
                 user.getHousehold().getId(),
                 user.getEmail());
 
-        // Create user data response
-        UserData userData = new UserData(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getHousehold().getId(),
-                user.getCreatedAt());
-
-        return new AuthResponseDto(token, userData);
+        return AuthExtensions.toAuthResponse(token, user);
     }
 }
