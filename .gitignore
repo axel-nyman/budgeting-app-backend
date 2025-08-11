@@ -5,6 +5,12 @@ logs/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Environment Variables ###
+.env
+.env.local
+.env.development
+.env.production
+
 ### CLAUDE ###
 .claude/
 .claude-*

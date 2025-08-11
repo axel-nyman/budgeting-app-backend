@@ -9,6 +9,26 @@
       "name": "jwt.secret",
       "type": "java.lang.String",
       "description": "A description for 'jwt.secret'"
+    },
+    {
+      "name": "spring.logging.level.org.springframework.web",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.logging.level.org.springframework.web'"
+    },
+    {
+      "name": "spring.logging.level.org.springframework.security",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.logging.level.org.springframework.security'"
+    },
+    {
+      "name": "spring.logging.level.org.hibernate.SQL",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.logging.level.org.hibernate.SQL'"
+    },
+    {
+      "name": "spring.logging.level.org.hibernate.type.descriptor.sql.BasicBinder",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.logging.level.org.hibernate.type.descriptor.sql.BasicBinder'"
     }
   ]
 }

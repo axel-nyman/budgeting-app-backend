@@ -5,12 +5,15 @@ A Spring Boot REST API backend for a personal budgeting application, designed fo
 ## 🚀 Quick Start for Frontend Engineers
 
 ### Base URL
+
 ```
 http://localhost:8080/api
 ```
 
 ### Authentication
+
 This API uses JWT Bearer token authentication. Include the token in the Authorization header:
+
 ```
 Authorization: Bearer <your-jwt-token>
 ```
@@ -20,19 +23,21 @@ Authorization: Bearer <your-jwt-token>
 ### Authentication Endpoints
 
 #### Register User
+
 ```http
 POST /api/auth/register
 Content-Type: application/json
 
 {
   "firstName": "John",
-  "lastName": "Doe", 
+  "lastName": "Doe",
   "email": "john.doe@example.com",
   "password": "securePassword123"
 }
 ```
 
 **Success Response (201 Created):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -48,6 +53,7 @@ Content-Type: application/json
 ```
 
 **Error Response (400 Bad Request):**
+
 ```json
 {
   "error": "User with email john.doe@example.com already exists",
@@ -58,6 +64,7 @@ Content-Type: application/json
 ```
 
 #### Login User
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -69,13 +76,14 @@ Content-Type: application/json
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": 1,
     "firstName": "John",
-    "lastName": "Doe", 
+    "lastName": "Doe",
     "email": "john.doe@example.com",
     "householdId": 1,
     "createdAt": "2024-01-15T10:30:00"
@@ -84,6 +92,7 @@ Content-Type: application/json
 ```
 
 **Error Response (401 Unauthorized):**
+
 ```json
 {
   "error": "Invalid credentials"
@@ -91,15 +100,18 @@ Content-Type: application/json
 ```
 
 ### User Management Endpoints
-*All user endpoints require authentication*
+
+_All user endpoints require authentication_
 
 #### Get Current User
+
 ```http
 GET /api/users/me
 Authorization: Bearer <jwt-token>
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "userId": 1,
@@ -109,12 +121,14 @@ Authorization: Bearer <jwt-token>
 ```
 
 #### Get User by ID
+
 ```http
 GET /api/users/{id}
 Authorization: Bearer <jwt-token>
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -125,12 +139,14 @@ Authorization: Bearer <jwt-token>
 ```
 
 #### Get All Users
+
 ```http
 GET /api/users
 Authorization: Bearer <jwt-token>
 ```
 
 **Success Response (200 OK):**
+
 ```json
 [
   {
@@ -149,59 +165,66 @@ Authorization: Bearer <jwt-token>
 ```
 
 #### Delete User
+
 ```http
 DELETE /api/users/{id}
 Authorization: Bearer <jwt-token>
 ```
 
-**Success Response (204 No Content):** *(Empty body)*
+**Success Response (204 No Content):** _(Empty body)_
 
-**Error Response (404 Not Found):** *(Empty body)*
+**Error Response (404 Not Found):** _(Empty body)_
 
 ## 🔐 Authentication Flow
 
 ### 1. User Registration
+
 1. Send `POST /api/auth/register` with user details
 2. Receive JWT token and user data
 3. Store JWT token securely (localStorage/sessionStorage)
 4. Include token in Authorization header for subsequent requests
 
 ### 2. User Login
+
 1. Send `POST /api/auth/login` with email/password
 2. Receive JWT token and user data
 3. Store JWT token securely
 4. Include token in Authorization header for subsequent requests
 
 ### 3. Authenticated Requests
+
 Include the JWT token in every request to protected endpoints:
+
 ```javascript
 const headers = {
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
 };
 ```
 
 ### 4. Token Expiration
+
 - JWT tokens expire after 24 hours
 - When you receive a 401 Unauthorized response, redirect user to login
 
 ## 🛠 Frontend Integration Examples
 
 ### JavaScript/Fetch API
+
 ```javascript
 // Register user
 async function registerUser(userData) {
-  const response = await fetch('http://localhost:8080/api/auth/register', {
-    method: 'POST',
+  const response = await fetch("http://localhost:8080/api/auth/register", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(userData)
+    body: JSON.stringify(userData),
   });
-  
+
   if (response.ok) {
     const data = await response.json();
-    localStorage.setItem('jwtToken', data.token);
+    localStorage.setItem("jwtToken", data.token);
     return data;
   } else {
     const error = await response.json();
@@ -211,17 +234,17 @@ async function registerUser(userData) {
 
 // Login user
 async function loginUser(credentials) {
-  const response = await fetch('http://localhost:8080/api/auth/login', {
-    method: 'POST',
+  const response = await fetch("http://localhost:8080/api/auth/login", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(credentials)
+    body: JSON.stringify(credentials),
   });
-  
+
   if (response.ok) {
     const data = await response.json();
-    localStorage.setItem('jwtToken', data.token);
+    localStorage.setItem("jwtToken", data.token);
     return data;
   } else {
     const error = await response.json();
@@ -231,40 +254,41 @@ async function loginUser(credentials) {
 
 // Get current user (authenticated)
 async function getCurrentUser() {
-  const token = localStorage.getItem('jwtToken');
-  const response = await fetch('http://localhost:8080/api/users/me', {
+  const token = localStorage.getItem("jwtToken");
+  const response = await fetch("http://localhost:8080/api/users/me", {
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
-  
+
   if (response.ok) {
     return await response.json();
   } else if (response.status === 401) {
     // Token expired, redirect to login
-    localStorage.removeItem('jwtToken');
-    window.location.href = '/login';
+    localStorage.removeItem("jwtToken");
+    window.location.href = "/login";
   } else {
-    throw new Error('Failed to fetch user data');
+    throw new Error("Failed to fetch user data");
   }
 }
 ```
 
 ### React/Axios Example
+
 ```javascript
-import axios from 'axios';
+import axios from "axios";
 
 // Configure axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: "http://localhost:8080/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor to add auth token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('jwtToken');
+  const token = localStorage.getItem("jwtToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -276,8 +300,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('jwtToken');
-      window.location.href = '/login';
+      localStorage.removeItem("jwtToken");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -285,14 +309,14 @@ api.interceptors.response.use(
 
 // API functions
 export const authAPI = {
-  register: (userData) => api.post('/auth/register', userData),
-  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post("/auth/register", userData),
+  login: (credentials) => api.post("/auth/login", credentials),
 };
 
 export const userAPI = {
-  getCurrentUser: () => api.get('/users/me'),
+  getCurrentUser: () => api.get("/users/me"),
   getUserById: (id) => api.get(`/users/${id}`),
-  getAllUsers: () => api.get('/users'),
+  getAllUsers: () => api.get("/users"),
   deleteUser: (id) => api.delete(`/users/${id}`),
 };
 ```
@@ -302,6 +326,7 @@ export const userAPI = {
 ### Common Error Responses
 
 #### 400 Bad Request
+
 ```json
 {
   "error": "User with email john.doe@example.com already exists",
@@ -311,7 +336,8 @@ export const userAPI = {
 }
 ```
 
-#### 401 Unauthorized  
+#### 401 Unauthorized
+
 ```json
 {
   "error": "Invalid credentials"
@@ -319,9 +345,11 @@ export const userAPI = {
 ```
 
 #### 404 Not Found
+
 Empty response body with 404 status code.
 
 #### 500 Internal Server Error
+
 ```json
 {
   "error": "An unexpected error occurred"
@@ -329,6 +357,7 @@ Empty response body with 404 status code.
 ```
 
 ### Error Handling Best Practices
+
 1. Always check response status codes
 2. Handle 401 errors by redirecting to login
 3. Display user-friendly error messages from `error` field
@@ -337,6 +366,7 @@ Empty response body with 404 status code.
 ## 🏗 Data Models
 
 ### User Object
+
 ```typescript
 interface User {
   id: number;
@@ -349,6 +379,7 @@ interface User {
 ```
 
 ### Auth Response
+
 ```typescript
 interface AuthResponse {
   token: string;
@@ -364,6 +395,7 @@ interface AuthResponse {
 ```
 
 ### Current User Response
+
 ```typescript
 interface CurrentUser {
   userId: number;
@@ -375,26 +407,34 @@ interface CurrentUser {
 ## 🚀 Development Setup
 
 ### Prerequisites
+
 - Java 17+
 - Docker (for database)
 
-### Quick Start
-1. **Start the database:**
+### Quick Start (Recommended: Native Development)
+
+This setup provides the fastest development experience with instant code reloads.
+
+1. **Start database only:**
+
    ```bash
-   docker-compose up -d
+   docker-compose -f docker-compose.dev.yml up -d
    ```
 
-2. **Run the application:**
+2. **Run the application natively:**
+
    ```bash
-   ./mvnw spring-boot:run
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
    ```
 
 3. **API will be available at:**
+
    ```
    http://localhost:8080/api
    ```
 
 4. **Database admin interface:**
+
    ```
    http://localhost:8081 (Adminer)
    Username: user
@@ -402,21 +442,69 @@ interface CurrentUser {
    Database: mydatabase
    ```
 
+5. **Stop database when done:**
+   ```bash
+   docker-compose -f docker-compose.dev.yml down
+   ```
+
+### Environment Configuration
+
+For custom configurations, copy `.env.example` to `.env` and modify as needed:
+
+```bash
+cp .env.example .env
+# Edit .env with your preferred settings
+```
+
 ### Running Tests
+
 ```bash
 ./mvnw test
 ```
 
-## 📚 Additional Resources
+## 📚 API Documentation & Resources
 
-- **OpenAPI Documentation:** Available at `http://localhost:8080/swagger-ui.html` when running locally
+### Interactive API Documentation (Swagger UI)
+
+When the application is running locally, you can access interactive API documentation at:
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+**Features:**
+- **Interactive Testing:** Test all endpoints directly from the browser
+- **Authentication Support:** Use the "Authorize" button to add your JWT token
+- **Request/Response Examples:** See actual request/response formats
+- **Schema Definitions:** View all data models and their properties
+
+### OpenAPI Specification
+
+Raw OpenAPI 3.0 specification (JSON format) available at:
+
+```
+http://localhost:8080/v3/api-docs
+```
+
+### How to Use Swagger UI for Testing
+
+1. **Start the application** (database + app)
+2. **Open Swagger UI:** http://localhost:8080/swagger-ui.html
+3. **Register a test user** using the `/api/auth/register` endpoint
+4. **Copy the JWT token** from the registration response
+5. **Click "Authorize"** button (🔒 icon) at the top right
+6. **Enter:** `Bearer <your-jwt-token>` in the authorization field
+7. **Test protected endpoints** like `/api/users/me`
+
+### Additional Resources
+
 - **Database Schema:** Auto-generated from JPA entities
 - **CORS:** Currently configured for development (adjust for production)
 
 ## 🔒 Security Considerations
 
 - Passwords are hashed using BCrypt
-- JWT tokens expire after 24 hours  
+- JWT tokens expire after 24 hours
 - Always use HTTPS in production
 - Store JWT tokens securely (avoid localStorage for sensitive applications)
 - Implement proper CORS policies for production
@@ -426,11 +514,12 @@ interface CurrentUser {
 This Spring Boot application follows clean architecture principles:
 
 - **Domain Layer:** Business logic and entities
-- **API Layer:** REST controllers  
+- **API Layer:** REST controllers
 - **Infrastructure Layer:** Database access and security
 - **Shared Layer:** Exception handling and utilities
 
 The application uses:
+
 - **PostgreSQL** for data persistence
 - **Spring Security** with JWT authentication
 - **JPA/Hibernate** for ORM
