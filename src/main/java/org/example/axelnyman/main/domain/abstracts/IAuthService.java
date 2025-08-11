@@ -1,7 +1,6 @@
 package org.example.axelnyman.main.domain.abstracts;
 
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
 import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
 
@@ -11,7 +10,7 @@ import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
  * authentication-specific business logic.
  */
 public interface IAuthService {
-    UserRegistrationResponse registerUser(RegisterUserRequest request);
+    AuthResponseDto registerUser(RegisterUserRequest request);
     
     AuthResponseDto login(LoginDto loginDto);
 }

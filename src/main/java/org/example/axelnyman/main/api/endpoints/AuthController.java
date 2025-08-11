@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
 import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
@@ -38,7 +37,7 @@ public class AuthController {
     })
     public ResponseEntity<Object> register(@Valid @RequestBody RegisterUserRequest request) {
         try {
-            UserRegistrationResponse response = authService.registerUser(request);
+            AuthResponseDto response = authService.registerUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (DuplicateEmailException e) {
             Map<String, Object> errorResponse = new HashMap<>();

@@ -105,7 +105,7 @@ public class AuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message", is("User registered successfully")))
+                .andExpect(jsonPath("$.token", notNullValue()))
                 .andExpect(jsonPath("$.user.firstName", is("John")))
                 .andExpect(jsonPath("$.user.lastName", is("Doe")))
                 .andExpect(jsonPath("$.user.email", is("john.doe@example.com")))
@@ -125,6 +125,62 @@ public class AuthIntegrationTest {
         assertThat(householdRepository.count(), is(1L));
         var household = householdRepository.findById(savedUser.getHousehold().getId()).orElseThrow();
         assertThat(household.getName(), is("John Doe's Household"));
+    }
+
+    @Test
+    void shouldValidateJwtTokenClaimsAfterRegistration() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Alice", "Johnson", "alice.johnson@example.com", "password123");
+
+        String responseContent = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Extract token and validate claims
+        var responseMap = objectMapper.readValue(responseContent, Map.class);
+        String token = (String) responseMap.get("token");
+        
+        assertTrue(jwtTokenProvider.validateToken(token));
+        
+        // Verify user was saved and get their details for validation
+        User savedUser = userRepository.findAll().get(0);
+        
+        assertEquals(savedUser.getId().toString(), jwtTokenProvider.getUserIdFromToken(token));
+        assertEquals(savedUser.getHousehold().getId().toString(), jwtTokenProvider.getHouseholdIdFromToken(token));
+        assertEquals("alice.johnson@example.com", jwtTokenProvider.getEmailFromToken(token));
+    }
+
+    @Test
+    void shouldAllowImmediateUseOfTokenAfterRegistration() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Bob", "Smith", "bob.smith@example.com", "password123");
+
+        String responseContent = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Extract token from registration response
+        var responseMap = objectMapper.readValue(responseContent, Map.class);
+        String token = (String) responseMap.get("token");
+        
+        // Verify the token can be used immediately for protected endpoints (if we had any)
+        // For now, just verify the token is valid and has correct claims
+        assertTrue(jwtTokenProvider.validateToken(token));
+        
+        User savedUser = userRepository.findAll().get(0);
+        assertEquals(savedUser.getId().toString(), jwtTokenProvider.getUserIdFromToken(token));
+        assertEquals(savedUser.getEmail(), jwtTokenProvider.getEmailFromToken(token));
+        assertEquals(savedUser.getHousehold().getId().toString(), jwtTokenProvider.getHouseholdIdFromToken(token));
     }
 
     @Test

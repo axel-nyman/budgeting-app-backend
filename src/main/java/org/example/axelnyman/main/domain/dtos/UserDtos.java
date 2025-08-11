@@ -21,19 +21,6 @@ public class UserDtos {
                         @NotBlank(message = "Password is required") @Size(min = 8, message = "Password must be at least 8 characters long") String password) {
         }
 
-        public record UserRegistrationResponse(
-                        String message,
-                        UserRegistrationData user) {
-        }
-
-        public record UserRegistrationData(
-                        Long id,
-                        String firstName,
-                        String lastName,
-                        String email,
-                        Long householdId,
-                        LocalDateTime createdAt) {
-        }
 
         public record LoginDto(
                         @Email(message = "Email should be valid") @NotBlank(message = "Email is required") String email,

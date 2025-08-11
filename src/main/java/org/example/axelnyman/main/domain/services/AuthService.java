@@ -3,7 +3,6 @@ package org.example.axelnyman.main.domain.services;
 import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserRegistrationResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
 import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
 import org.example.axelnyman.main.domain.extensions.AuthExtensions;
@@ -31,7 +30,7 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public UserRegistrationResponse registerUser(RegisterUserRequest request) {
+    public AuthResponseDto registerUser(RegisterUserRequest request) {
         boolean exists = dataService.userExistsByEmailIncludingDeleted(request.email());
         if (exists) {
             throw new DuplicateEmailException("User with email " + request.email() + " already exists");
@@ -53,7 +52,13 @@ public class AuthService implements IAuthService {
 
         User savedUser = dataService.saveUser(user);
 
-        return AuthExtensions.toUserRegistrationResponse(savedUser);
+        // Generate JWT token
+        String token = jwtTokenProvider.generateToken(
+                savedUser.getId(),
+                savedUser.getHousehold().getId(),
+                savedUser.getEmail());
+
+        return AuthExtensions.toAuthResponse(token, savedUser);
     }
 
     @Override
