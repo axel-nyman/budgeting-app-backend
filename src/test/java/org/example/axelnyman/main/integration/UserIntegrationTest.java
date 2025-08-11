@@ -1,11 +1,14 @@
 package org.example.axelnyman.main.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -21,10 +24,13 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
+
+import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -56,6 +62,9 @@ public class UserIntegrationTest {
         @Autowired
         private HouseholdRepository householdRepository;
 
+        @Autowired
+        private ObjectMapper objectMapper;
+
         private MockMvc mockMvc;
 
         @BeforeEach
@@ -78,18 +87,11 @@ public class UserIntegrationTest {
 
         @Test
         void shouldGetUserById() throws Exception {
-                Household household = new Household("Test Household");
-                Household savedHousehold = householdRepository.save(household);
-                
-                User user = new User(
-                                "John",
-                                "Doe",
-                                "john.doe@example.com",
-                                "hashedPassword123",
-                                savedHousehold);
-                User savedUser = userRepository.save(user);
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                User savedUser = userRepository.findAll().get(0);
 
-                mockMvc.perform(get("/api/users/" + savedUser.getId()))
+                mockMvc.perform(get("/api/users/" + savedUser.getId())
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.id", is(savedUser.getId().intValue())))
                                 .andExpect(jsonPath("$.email", is("john.doe@example.com")));
@@ -97,18 +99,12 @@ public class UserIntegrationTest {
 
         @Test
         void shouldGetAllUsers() throws Exception {
-                Household household1 = new Household("Test Household 1");
-                Household savedHousehold1 = householdRepository.save(household1);
-                
+                // Create first user and get token
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+
+                // Create second user manually
                 Household household2 = new Household("Test Household 2");
                 Household savedHousehold2 = householdRepository.save(household2);
-                
-                User user1 = new User(
-                                "John",
-                                "Doe",
-                                "john.doe@example.com",
-                                "hashedPassword123",
-                                savedHousehold1);
 
                 User user2 = new User(
                                 "Jane",
@@ -117,29 +113,36 @@ public class UserIntegrationTest {
                                 "hashedPassword456",
                                 savedHousehold2);
 
-                userRepository.save(user1);
                 userRepository.save(user2);
 
-                mockMvc.perform(get("/api/users"))
+                mockMvc.perform(get("/api/users")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$", hasSize(2)));
         }
 
         @Test
         void shouldDeleteUser() throws Exception {
-                Household household = new Household("Test Household");
-                Household savedHousehold = householdRepository.save(household);
-                
-                User user = new User(
-                                "John",
-                                "Doe",
-                                "john.doe@example.com",
-                                "hashedPassword123",
-                                savedHousehold);
-                User savedUser = userRepository.save(user);
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                User savedUser = userRepository.findAll().get(0);
 
-                mockMvc.perform(delete("/api/users/" + savedUser.getId()))
+                mockMvc.perform(delete("/api/users/" + savedUser.getId())
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isNoContent());
+        }
 
+        private String createUserAndGetToken(String email, String firstName, String lastName) throws Exception {
+                RegisterUserRequest request = new RegisterUserRequest(firstName, lastName, email, "password123");
+
+                String responseContent = mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
+
+                var responseMap = objectMapper.readValue(responseContent, Map.class);
+                return (String) responseMap.get("token");
         }
 }
