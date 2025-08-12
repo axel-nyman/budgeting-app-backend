@@ -19,7 +19,7 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Users", description = "User management endpoints")
-@SecurityRequirement(name = "Bearer Authentication")
+@SecurityRequirement(name = "bearerAuth")
 public class UserEndpoints {
 
     private final IDomainService domainService;

@@ -30,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user", description = "Register a new user with firstName, lastName, email, and password")
+    @Operation(summary = "Register a new user", description = "Register a new user with firstName, lastName, email, and password", security = {})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User registered successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input or duplicate email")
@@ -54,7 +54,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login user", description = "Authenticate user with email and password")
+    @Operation(summary = "Login user", description = "Authenticate user with email and password", security = {})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successful"),
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
