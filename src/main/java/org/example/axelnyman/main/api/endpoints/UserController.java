@@ -29,14 +29,14 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    @Operation(summary = "Get user by ID", description = "Retrieve a specific user by their ID")
+    @Operation(summary = "Get user by ID", description = "Retrieve a specific user by their ID from the same household")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User found"),
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
-        return domainService.getUserById(id)
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id, @CurrentUser UserPrincipal currentUser) {
+        return domainService.getUserByIdInHousehold(id, currentUser.getHouseholdId())
                 .map(user -> ResponseEntity.ok(user))
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.household.id = :householdId AND u.deletedAt IS NULL")
     List<User> findActiveByHouseholdId(@Param("householdId") Long householdId);
+
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.household.id = :householdId AND u.deletedAt IS NULL")
+    Optional<User> findActiveByIdAndHouseholdId(@Param("id") Long id, @Param("householdId") Long householdId);
 }

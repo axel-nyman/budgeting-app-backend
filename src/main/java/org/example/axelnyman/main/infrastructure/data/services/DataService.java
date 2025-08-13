@@ -74,4 +74,9 @@ public class DataService implements IDataService {
     public List<User> getActiveUsersByHouseholdId(Long householdId) {
         return userRepository.findActiveByHouseholdId(householdId);
     }
+
+    @Override
+    public Optional<User> getActiveUserByIdAndHouseholdId(Long id, Long householdId) {
+        return userRepository.findActiveByIdAndHouseholdId(id, householdId);
+    }
 }

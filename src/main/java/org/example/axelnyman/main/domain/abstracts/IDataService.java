@@ -31,4 +31,6 @@ public interface IDataService {
     Optional<Household> getHouseholdById(Long id);
 
     List<User> getActiveUsersByHouseholdId(Long householdId);
+
+    Optional<User> getActiveUserByIdAndHouseholdId(Long id, Long householdId);
 }

@@ -14,6 +14,8 @@ import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
 public interface IDomainService {
     Optional<UserResponse> getUserById(Long id);
 
+    Optional<UserResponse> getUserByIdInHousehold(Long id, Long householdId);
+
     List<UserResponse> getAllUsers();
 
     boolean deleteUser(Long id);

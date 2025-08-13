@@ -86,15 +86,87 @@ public class UserIntegrationTest {
         }
 
         @Test
-        void shouldGetUserById() throws Exception {
+        void shouldGetUserByIdInSameHousehold() throws Exception {
+                // Create first user and get token
                 String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
-                User savedUser = userRepository.findAll().get(0);
+                User firstUser = userRepository.findAll().get(0);
+                Household firstHousehold = firstUser.getHousehold();
 
-                mockMvc.perform(get("/api/users/" + savedUser.getId())
+                // Create second user in same household
+                User user2 = new User(
+                                "Jane",
+                                "Smith",
+                                "jane.smith@example.com",
+                                "hashedPassword456",
+                                firstHousehold);
+                User savedUser2 = userRepository.save(user2);
+
+                mockMvc.perform(get("/api/users/" + savedUser2.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.id", is(savedUser.getId().intValue())))
-                                .andExpect(jsonPath("$.email", is("john.doe@example.com")));
+                                .andExpect(jsonPath("$.id", is(savedUser2.getId().intValue())))
+                                .andExpect(jsonPath("$.firstName", is("Jane")))
+                                .andExpect(jsonPath("$.lastName", is("Smith")))
+                                .andExpect(jsonPath("$.email", is("jane.smith@example.com")))
+                                // Ensure password fields are never included
+                                .andExpect(jsonPath("$.password").doesNotExist())
+                                .andExpect(jsonPath("$.hashedPassword").doesNotExist());
+        }
+
+        @Test
+        void shouldReturn404ForUserInDifferentHousehold() throws Exception {
+                // Create first user and get token
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+
+                // Create second user in different household
+                Household household2 = new Household("Different Household");
+                Household savedHousehold2 = householdRepository.save(household2);
+                User user2 = new User(
+                                "Jane",
+                                "Smith",
+                                "jane.smith@example.com",
+                                "hashedPassword456",
+                                savedHousehold2);
+                User savedUser2 = userRepository.save(user2);
+
+                mockMvc.perform(get("/api/users/" + savedUser2.getId())
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturn404ForSoftDeletedUser() throws Exception {
+                // Create first user and get token
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                User firstUser = userRepository.findAll().get(0);
+                Household firstHousehold = firstUser.getHousehold();
+
+                // Create second user in same household
+                User user2 = new User(
+                                "Jane",
+                                "Smith",
+                                "jane.smith@example.com",
+                                "hashedPassword456",
+                                firstHousehold);
+                User savedUser2 = userRepository.save(user2);
+
+                // Soft delete the second user
+                savedUser2.setDeletedAt(java.time.LocalDateTime.now());
+                userRepository.save(savedUser2);
+
+                mockMvc.perform(get("/api/users/" + savedUser2.getId())
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturn404ForNonExistentUser() throws Exception {
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                Long nonExistentId = 99999L;
+
+                mockMvc.perform(get("/api/users/" + nonExistentId)
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                                .andExpect(status().isNotFound());
         }
 
         @Test
