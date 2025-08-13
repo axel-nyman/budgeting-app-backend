@@ -19,4 +19,6 @@ public interface IDomainService {
     boolean deleteUser(Long id);
 
     Optional<UserProfileDto> getUserProfile(Long userId);
+
+    List<UserResponse> getHouseholdUsers(Long householdId);
 }

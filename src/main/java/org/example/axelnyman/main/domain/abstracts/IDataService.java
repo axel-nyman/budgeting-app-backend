@@ -29,4 +29,6 @@ public interface IDataService {
     Household saveHousehold(Household household);
 
     Optional<Household> getHouseholdById(Long id);
+
+    List<User> getActiveUsersByHouseholdId(Long householdId);
 }

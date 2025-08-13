@@ -98,27 +98,90 @@ public class UserIntegrationTest {
         }
 
         @Test
-        void shouldGetAllUsers() throws Exception {
+        void shouldGetHouseholdUsers() throws Exception {
                 // Create first user and get token
                 String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                User firstUser = userRepository.findAll().get(0);
+                Household firstHousehold = firstUser.getHousehold();
 
-                // Create second user manually
-                Household household2 = new Household("Test Household 2");
-                Household savedHousehold2 = householdRepository.save(household2);
-
+                // Create second user in same household
                 User user2 = new User(
                                 "Jane",
                                 "Smith",
                                 "jane.smith@example.com",
                                 "hashedPassword456",
-                                savedHousehold2);
+                                firstHousehold);
+                userRepository.save(user2);
 
+                // Create third user in different household
+                Household household2 = new Household("Different Household");
+                Household savedHousehold2 = householdRepository.save(household2);
+                User user3 = new User(
+                                "Bob",
+                                "Wilson",
+                                "bob.wilson@example.com",
+                                "hashedPassword789",
+                                savedHousehold2);
+                userRepository.save(user3);
+
+                mockMvc.perform(get("/api/users")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.users", hasSize(2)))
+                                .andExpect(jsonPath("$.users[0].firstName", anyOf(is("John"), is("Jane"))))
+                                .andExpect(jsonPath("$.users[1].firstName", anyOf(is("John"), is("Jane"))))
+                                // Ensure password fields are never included
+                                .andExpect(jsonPath("$.users[0].password").doesNotExist())
+                                .andExpect(jsonPath("$.users[0].hashedPassword").doesNotExist())
+                                .andExpect(jsonPath("$.users[1].password").doesNotExist())
+                                .andExpect(jsonPath("$.users[1].hashedPassword").doesNotExist());
+        }
+
+        @Test
+        void shouldExcludeSoftDeletedUsersFromHouseholdUsers() throws Exception {
+                // Create first user and get token
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                User firstUser = userRepository.findAll().get(0);
+                Household firstHousehold = firstUser.getHousehold();
+
+                // Create second user in same household
+                User user2 = new User(
+                                "Jane",
+                                "Smith",
+                                "jane.smith@example.com",
+                                "hashedPassword456",
+                                firstHousehold);
+                userRepository.save(user2);
+
+                // Soft delete the second user
+                user2.setDeletedAt(java.time.LocalDateTime.now());
                 userRepository.save(user2);
 
                 mockMvc.perform(get("/api/users")
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", hasSize(2)));
+                                .andExpect(jsonPath("$.users", hasSize(1)))
+                                .andExpect(jsonPath("$.users[0].firstName", is("John")));
+        }
+
+        @Test
+        void shouldOnlyReturnUsersFromAuthenticatedUserHousehold() throws Exception {
+                // Create two separate households with users
+                String token1 = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                String token2 = createUserAndGetToken("jane.smith@example.com", "Jane", "Smith");
+
+                // Each user should only see their own household users
+                mockMvc.perform(get("/api/users")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.users", hasSize(1)))
+                                .andExpect(jsonPath("$.users[0].firstName", is("John")));
+
+                mockMvc.perform(get("/api/users")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token2))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.users", hasSize(1)))
+                                .andExpect(jsonPath("$.users[0].firstName", is("Jane")));
         }
 
         @Test

@@ -43,4 +43,12 @@ public class DomainService implements IDomainService {
         return dataService.getUserById(userId)
                 .map(DomainExtensions::toUserProfileDto);
     }
+
+    @Override
+    public List<UserResponse> getHouseholdUsers(Long householdId) {
+        return dataService.getActiveUsersByHouseholdId(householdId)
+                .stream()
+                .map(DomainExtensions::toResponse)
+                .toList();
+    }
 }

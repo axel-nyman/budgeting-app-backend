@@ -29,7 +29,7 @@ Authorization: Bearer <your-jwt-token>
 #### User Management _(Authentication required)_
 - `GET /api/users/me` - Get current user profile
 - `GET /api/users/{id}` - Get user by ID  
-- `GET /api/users` - Get all users
+- `GET /api/users` - Get household users
 - `DELETE /api/users/{id}` - Delete user
 
 ### 📚 Complete API Documentation

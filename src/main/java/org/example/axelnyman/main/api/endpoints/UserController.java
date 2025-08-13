@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
+import org.example.axelnyman.main.domain.dtos.UserDtos.HouseholdUsersResponse;
 import org.example.axelnyman.main.infrastructure.security.CurrentUser;
 import org.example.axelnyman.main.infrastructure.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -41,14 +42,14 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    @Operation(summary = "Get all users", description = "Retrieve all users in the system")
+    @Operation(summary = "Get household users", description = "Retrieve all active users in the authenticated user's household")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
+            @ApiResponse(responseCode = "200", description = "Household users retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = domainService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<HouseholdUsersResponse> getHouseholdUsers(@CurrentUser UserPrincipal currentUser) {
+        List<UserResponse> users = domainService.getHouseholdUsers(currentUser.getHouseholdId());
+        return ResponseEntity.ok(new HouseholdUsersResponse(users));
     }
 
     @GetMapping("/users/me")
