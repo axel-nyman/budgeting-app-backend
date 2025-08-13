@@ -122,6 +122,33 @@ public class UserIntegrationTest {
         }
 
         @Test
+        void shouldGetCurrentUserProfile() throws Exception {
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+                User savedUser = userRepository.findAll().get(0);
+
+                mockMvc.perform(get("/api/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id", is(savedUser.getId().intValue())))
+                                .andExpect(jsonPath("$.firstName", is("John")))
+                                .andExpect(jsonPath("$.lastName", is("Doe")))
+                                .andExpect(jsonPath("$.email", is("john.doe@example.com")))
+                                .andExpect(jsonPath("$.household").exists())
+                                .andExpect(jsonPath("$.household.id", is(savedUser.getHousehold().getId().intValue())))
+                                .andExpect(jsonPath("$.household.name").exists())
+                                .andExpect(jsonPath("$.createdAt").exists())
+                                // Ensure password is never included in response
+                                .andExpect(jsonPath("$.password").doesNotExist())
+                                .andExpect(jsonPath("$.hashedPassword").doesNotExist());
+        }
+
+        @Test
+        void shouldReturn401WhenNotAuthenticated() throws Exception {
+                mockMvc.perform(get("/api/users/me"))
+                                .andExpect(status().isUnauthorized());
+        }
+
+        @Test
         void shouldDeleteUser() throws Exception {
                 String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
                 User savedUser = userRepository.findAll().get(0);

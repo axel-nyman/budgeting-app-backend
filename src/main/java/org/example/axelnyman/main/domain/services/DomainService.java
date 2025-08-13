@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
 import org.example.axelnyman.main.domain.extensions.DomainExtensions;
 import org.springframework.stereotype.Service;
 
@@ -35,5 +36,11 @@ public class DomainService implements IDomainService {
     @Override
     public boolean deleteUser(Long id) {
         return dataService.deleteUserById(id);
+    }
+
+    @Override
+    public Optional<UserProfileDto> getUserProfile(Long userId) {
+        return dataService.getUserById(userId)
+                .map(DomainExtensions::toUserProfileDto);
     }
 }

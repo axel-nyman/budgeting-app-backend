@@ -40,4 +40,18 @@ public class UserDtos {
                         Long householdId,
                         LocalDateTime createdAt) {
         }
+
+        public record HouseholdDto(
+                        Long id,
+                        String name) {
+        }
+
+        public record UserProfileDto(
+                        Long id,
+                        String firstName,
+                        String lastName,
+                        String email,
+                        HouseholdDto household,
+                        LocalDateTime createdAt) {
+        }
 }

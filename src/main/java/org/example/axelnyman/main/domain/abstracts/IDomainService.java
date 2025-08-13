@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
 
 /**
  * Domain Service - Responsible for general business operations
@@ -16,4 +17,6 @@ public interface IDomainService {
     List<UserResponse> getAllUsers();
 
     boolean deleteUser(Long id);
+
+    Optional<UserProfileDto> getUserProfile(Long userId);
 }

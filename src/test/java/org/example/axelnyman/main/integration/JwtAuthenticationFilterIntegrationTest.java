@@ -144,9 +144,13 @@ public class JwtAuthenticationFilterIntegrationTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.userId", notNullValue()))
-                .andExpect(jsonPath("$.householdId", notNullValue()))
-                .andExpect(jsonPath("$.email", is("alice@example.com")));
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.firstName", is("Alice")))
+                .andExpect(jsonPath("$.lastName", is("Smith")))
+                .andExpect(jsonPath("$.email", is("alice@example.com")))
+                .andExpect(jsonPath("$.household").exists())
+                .andExpect(jsonPath("$.household.id", notNullValue()))
+                .andExpect(jsonPath("$.createdAt").exists());
     }
 
     @Test
@@ -210,9 +214,13 @@ public class JwtAuthenticationFilterIntegrationTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.userId", is(savedUser.getId().intValue())))
-                .andExpect(jsonPath("$.householdId", is(savedUser.getHousehold().getId().intValue())))
-                .andExpect(jsonPath("$.email", is("charlie@example.com")));
+                .andExpect(jsonPath("$.id", is(savedUser.getId().intValue())))
+                .andExpect(jsonPath("$.firstName", is("Charlie")))
+                .andExpect(jsonPath("$.lastName", is("Brown")))
+                .andExpect(jsonPath("$.email", is("charlie@example.com")))
+                .andExpect(jsonPath("$.household").exists())
+                .andExpect(jsonPath("$.household.id", is(savedUser.getHousehold().getId().intValue())))
+                .andExpect(jsonPath("$.createdAt").exists());
     }
 
     @Test
