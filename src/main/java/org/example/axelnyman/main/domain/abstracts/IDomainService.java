@@ -3,7 +3,7 @@ package org.example.axelnyman.main.domain.abstracts;
 import java.util.List;
 import java.util.Optional;
 
-import org.example.axelnyman.main.domain.dtos.UserDto.UserResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 
 /**
  * Domain Service - Responsible for general business operations

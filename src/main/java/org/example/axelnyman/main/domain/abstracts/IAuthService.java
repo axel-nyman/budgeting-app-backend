@@ -1,8 +1,6 @@
 package org.example.axelnyman.main.domain.abstracts;
 
-import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
-import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
-import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 
 /**
  * Authentication Service - Responsible for authentication and user lifecycle operations

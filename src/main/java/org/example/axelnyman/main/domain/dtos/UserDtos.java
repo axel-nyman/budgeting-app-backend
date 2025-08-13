@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
-public class UserDto {
+public class UserDtos {
 
     public record RegisterRequest(
             @NotBlank(message = "First name is required") 
@@ -38,7 +38,7 @@ public class UserDto {
             String firstName,
             String lastName,
             String email,
-            HouseholdDto.HouseholdResponse household,
+            HouseholdDtos.HouseholdResponse household,
             LocalDateTime createdAt
     ) {}
 

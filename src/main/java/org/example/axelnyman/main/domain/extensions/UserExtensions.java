@@ -1,7 +1,6 @@
 package org.example.axelnyman.main.domain.extensions;
 
-import org.example.axelnyman.main.domain.dtos.UserDto.UserResponse;
-import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.model.User;
 
 public final class UserExtensions {

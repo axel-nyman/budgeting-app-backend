@@ -1,6 +1,6 @@
 package org.example.axelnyman.main.domain.extensions;
 
-import org.example.axelnyman.main.domain.dtos.HouseholdDto.HouseholdResponse;
+import org.example.axelnyman.main.domain.dtos.HouseholdDtos.*;
 import org.example.axelnyman.main.domain.model.Household;
 
 public final class HouseholdExtensions {

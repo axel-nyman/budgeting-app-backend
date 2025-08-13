@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
-import org.example.axelnyman.main.domain.dtos.UserDto.UserResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.infrastructure.security.CurrentUser;
 import org.example.axelnyman.main.infrastructure.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;

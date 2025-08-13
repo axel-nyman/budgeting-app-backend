@@ -1,6 +1,6 @@
 package org.example.axelnyman.main.domain.dtos;
 
-public class HouseholdDto {
+public class HouseholdDtos {
 
     public record HouseholdResponse(
             Long id,

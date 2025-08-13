@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
-import org.example.axelnyman.main.domain.dtos.UserDto.UserResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.extensions.UserExtensions;
 import org.springframework.stereotype.Service;
 

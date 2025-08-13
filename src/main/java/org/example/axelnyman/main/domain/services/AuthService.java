@@ -2,9 +2,7 @@ package org.example.axelnyman.main.domain.services;
 
 import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
-import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
-import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
-import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
+import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.extensions.UserExtensions;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
