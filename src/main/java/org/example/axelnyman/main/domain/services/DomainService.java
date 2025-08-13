@@ -7,7 +7,7 @@ import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
-import org.example.axelnyman.main.domain.extensions.DomainExtensions;
+import org.example.axelnyman.main.domain.extensions.UserExtensions;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,20 +22,20 @@ public class DomainService implements IDomainService {
     @Override
     public Optional<UserResponse> getUserById(Long id) {
         return dataService.getUserById(id)
-                .map(DomainExtensions::toResponse);
+                .map(UserExtensions::toResponse);
     }
 
     @Override
     public Optional<UserResponse> getUserByIdInHousehold(Long id, Long householdId) {
         return dataService.getActiveUserByIdAndHouseholdId(id, householdId)
-                .map(DomainExtensions::toResponse);
+                .map(UserExtensions::toResponse);
     }
 
     @Override
     public List<UserResponse> getAllUsers() {
         return dataService.getAllUsers()
                 .stream()
-                .map(DomainExtensions::toResponse)
+                .map(UserExtensions::toResponse)
                 .toList();
     }
 
@@ -47,14 +47,14 @@ public class DomainService implements IDomainService {
     @Override
     public Optional<UserProfileDto> getUserProfile(Long userId) {
         return dataService.getUserById(userId)
-                .map(DomainExtensions::toUserProfileDto);
+                .map(UserExtensions::toUserProfileDto);
     }
 
     @Override
     public List<UserResponse> getHouseholdUsers(Long householdId) {
         return dataService.getActiveUsersByHouseholdId(householdId)
                 .stream()
-                .map(DomainExtensions::toResponse)
+                .map(UserExtensions::toResponse)
                 .toList();
     }
 }

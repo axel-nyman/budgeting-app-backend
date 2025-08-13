@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
-import org.example.axelnyman.main.domain.dtos.UserDtos.HouseholdUsersResponse;
+import org.example.axelnyman.main.domain.dtos.HouseholdDtos.HouseholdUsersResponse;
 import org.example.axelnyman.main.infrastructure.security.CurrentUser;
 import org.example.axelnyman.main.infrastructure.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;

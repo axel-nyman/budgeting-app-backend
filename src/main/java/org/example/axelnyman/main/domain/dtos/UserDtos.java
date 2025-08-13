@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class UserDtos {
         public record UserResponse(
@@ -42,21 +41,12 @@ public class UserDtos {
                         LocalDateTime createdAt) {
         }
 
-        public record HouseholdDto(
-                        Long id,
-                        String name) {
-        }
-
         public record UserProfileDto(
                         Long id,
                         String firstName,
                         String lastName,
                         String email,
-                        HouseholdDto household,
+                        HouseholdDtos.HouseholdDto household,
                         LocalDateTime createdAt) {
-        }
-
-        public record HouseholdUsersResponse(
-                        List<UserResponse> users) {
         }
 }
