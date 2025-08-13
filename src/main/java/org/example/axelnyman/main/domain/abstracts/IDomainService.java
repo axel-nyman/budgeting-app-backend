@@ -3,8 +3,7 @@ package org.example.axelnyman.main.domain.abstracts;
 import java.util.List;
 import java.util.Optional;
 
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
+import org.example.axelnyman.main.domain.dtos.UserDto.UserResponse;
 
 /**
  * Domain Service - Responsible for general business operations
@@ -20,7 +19,7 @@ public interface IDomainService {
 
     boolean deleteUser(Long id);
 
-    Optional<UserProfileDto> getUserProfile(Long userId);
+    Optional<UserResponse> getUserProfile(Long userId);
 
     List<UserResponse> getHouseholdUsers(Long householdId);
 }

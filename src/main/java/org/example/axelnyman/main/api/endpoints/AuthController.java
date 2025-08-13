@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.axelnyman.main.domain.abstracts.IAuthService;
-import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
-import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
+import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
 import org.example.axelnyman.main.shared.exceptions.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
@@ -35,9 +35,9 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "User registered successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input or duplicate email")
     })
-    public ResponseEntity<Object> register(@Valid @RequestBody RegisterUserRequest request) {
+    public ResponseEntity<Object> register(@Valid @RequestBody RegisterRequest request) {
         try {
-            AuthResponseDto response = authService.registerUser(request);
+            AuthResponse response = authService.registerUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (DuplicateEmailException e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -59,9 +59,9 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Login successful"),
             @ApiResponse(responseCode = "401", description = "Invalid credentials")
     })
-    public ResponseEntity<Object> login(@Valid @RequestBody LoginDto loginDto) {
+    public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            AuthResponseDto response = authService.login(loginDto);
+            AuthResponse response = authService.login(loginRequest);
             return ResponseEntity.ok(response);
         } catch (InvalidCredentialsException e) {
             Map<String, String> errorResponse = new HashMap<>();

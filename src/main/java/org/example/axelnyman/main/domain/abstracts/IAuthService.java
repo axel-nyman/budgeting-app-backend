@@ -1,8 +1,8 @@
 package org.example.axelnyman.main.domain.abstracts;
 
-import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
-import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
+import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
 
 /**
  * Authentication Service - Responsible for authentication and user lifecycle operations
@@ -10,7 +10,7 @@ import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
  * authentication-specific business logic.
  */
 public interface IAuthService {
-    AuthResponseDto registerUser(RegisterUserRequest request);
+    AuthResponse registerUser(RegisterRequest request);
     
-    AuthResponseDto login(LoginDto loginDto);
+    AuthResponse login(LoginRequest loginRequest);
 }

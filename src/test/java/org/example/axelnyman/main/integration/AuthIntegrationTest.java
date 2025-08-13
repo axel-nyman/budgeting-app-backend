@@ -26,8 +26,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
+import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
@@ -98,7 +98,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldRegisterNewUser() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "John", "Doe", "john.doe@example.com", "password123");
 
         mockMvc.perform(post("/api/auth/register")
@@ -110,7 +110,7 @@ public class AuthIntegrationTest {
                 .andExpect(jsonPath("$.user.lastName", is("Doe")))
                 .andExpect(jsonPath("$.user.email", is("john.doe@example.com")))
                 .andExpect(jsonPath("$.user.id", notNullValue()))
-                .andExpect(jsonPath("$.user.householdId", notNullValue()))
+                .andExpect(jsonPath("$.user.household.id", notNullValue()))
                 .andExpect(jsonPath("$.user.createdAt", notNullValue()));
 
         // Verify user was saved in database
@@ -129,7 +129,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldValidateJwtTokenClaimsAfterRegistration() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "Alice", "Johnson", "alice.johnson@example.com", "password123");
 
         String responseContent = mockMvc.perform(post("/api/auth/register")
@@ -157,7 +157,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldAllowImmediateUseOfTokenAfterRegistration() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "Bob", "Smith", "bob.smith@example.com", "password123");
 
         String responseContent = mockMvc.perform(post("/api/auth/register")
@@ -192,7 +192,7 @@ public class AuthIntegrationTest {
         User existingUser = new User("Jane", "Doe", "jane.doe@example.com", "hashedPassword", savedHousehold);
         userRepository.save(existingUser);
 
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "John", "Doe", "jane.doe@example.com", "password123");
 
         mockMvc.perform(post("/api/auth/register")
@@ -205,7 +205,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldNotRegisterUserWithInvalidEmail() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "John", "Doe", "invalid-email", "password123");
 
         mockMvc.perform(post("/api/auth/register")
@@ -216,7 +216,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldNotRegisterUserWithShortPassword() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "John", "Doe", "john.doe@example.com", "short");
 
         mockMvc.perform(post("/api/auth/register")
@@ -227,7 +227,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldNotRegisterUserWithMissingFields() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "", "", "", "");
 
         mockMvc.perform(post("/api/auth/register")
@@ -249,7 +249,7 @@ public class AuthIntegrationTest {
         User user = new User("John", "Doe", "john.doe@example.com", hashedPassword, savedHousehold);
         User savedUser = userRepository.save(user);
 
-        LoginDto loginDto = new LoginDto("john.doe@example.com", rawPassword);
+        LoginRequest loginDto = new LoginRequest("john.doe@example.com", rawPassword);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -260,7 +260,7 @@ public class AuthIntegrationTest {
                 .andExpect(jsonPath("$.user.firstName", is("John")))
                 .andExpect(jsonPath("$.user.lastName", is("Doe")))
                 .andExpect(jsonPath("$.user.email", is("john.doe@example.com")))
-                .andExpect(jsonPath("$.user.householdId", is(savedHousehold.getId().intValue())))
+                .andExpect(jsonPath("$.user.household.id", is(savedHousehold.getId().intValue())))
                 .andExpect(jsonPath("$.user.createdAt", notNullValue()));
     }
 
@@ -275,7 +275,7 @@ public class AuthIntegrationTest {
         User user = new User("Jane", "Smith", "jane.smith@example.com", hashedPassword, savedHousehold);
         User savedUser = userRepository.save(user);
 
-        LoginDto loginDto = new LoginDto("jane.smith@example.com", rawPassword);
+        LoginRequest loginDto = new LoginRequest("jane.smith@example.com", rawPassword);
 
         String responseContent = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -297,7 +297,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldReturnUnauthorizedForInvalidEmail() throws Exception {
-        LoginDto loginDto = new LoginDto("nonexistent@example.com", "password123");
+        LoginRequest loginDto = new LoginRequest("nonexistent@example.com", "password123");
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -317,7 +317,7 @@ public class AuthIntegrationTest {
         User user = new User("Bob", "Johnson", "bob.johnson@example.com", hashedPassword, savedHousehold);
         userRepository.save(user);
 
-        LoginDto loginDto = new LoginDto("bob.johnson@example.com", "wrongPassword");
+        LoginRequest loginDto = new LoginRequest("bob.johnson@example.com", "wrongPassword");
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -338,7 +338,7 @@ public class AuthIntegrationTest {
         user.setDeletedAt(LocalDateTime.now()); // Soft delete the user
         userRepository.save(user);
 
-        LoginDto loginDto = new LoginDto("alice.williams@example.com", rawPassword);
+        LoginRequest loginDto = new LoginRequest("alice.williams@example.com", rawPassword);
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -349,7 +349,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldReturnBadRequestForInvalidEmailFormat() throws Exception {
-        LoginDto loginDto = new LoginDto("invalid-email", "password123");
+        LoginRequest loginDto = new LoginRequest("invalid-email", "password123");
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -359,7 +359,7 @@ public class AuthIntegrationTest {
 
     @Test
     void shouldReturnBadRequestForMissingFields() throws Exception {
-        LoginDto loginDto = new LoginDto("", "");
+        LoginRequest loginDto = new LoginRequest("", "");
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

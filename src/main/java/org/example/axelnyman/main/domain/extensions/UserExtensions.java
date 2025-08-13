@@ -1,7 +1,7 @@
 package org.example.axelnyman.main.domain.extensions;
 
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserResponse;
-import org.example.axelnyman.main.domain.dtos.UserDtos.UserProfileDto;
+import org.example.axelnyman.main.domain.dtos.UserDto.UserResponse;
+import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
 import org.example.axelnyman.main.domain.model.User;
 
 public final class UserExtensions {
@@ -15,16 +15,12 @@ public final class UserExtensions {
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail());
+                user.getEmail(),
+                HouseholdExtensions.toResponse(user.getHousehold()),
+                user.getCreatedAt());
     }
 
-    public static UserProfileDto toUserProfileDto(User user) {
-        return new UserProfileDto(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                HouseholdExtensions.toHouseholdDto(user.getHousehold()),
-                user.getCreatedAt());
+    public static AuthResponse toAuthResponse(String token, User user) {
+        return new AuthResponse(token, toResponse(user));
     }
 }

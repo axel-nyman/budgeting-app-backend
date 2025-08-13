@@ -24,7 +24,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
@@ -199,14 +199,14 @@ public class UserIntegrationTest {
                 mockMvc.perform(get("/api/users")
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.users", hasSize(2)))
-                                .andExpect(jsonPath("$.users[0].firstName", anyOf(is("John"), is("Jane"))))
-                                .andExpect(jsonPath("$.users[1].firstName", anyOf(is("John"), is("Jane"))))
+                                .andExpect(jsonPath("$", hasSize(2)))
+                                .andExpect(jsonPath("$[0].firstName", anyOf(is("John"), is("Jane"))))
+                                .andExpect(jsonPath("$[1].firstName", anyOf(is("John"), is("Jane"))))
                                 // Ensure password fields are never included
-                                .andExpect(jsonPath("$.users[0].password").doesNotExist())
-                                .andExpect(jsonPath("$.users[0].hashedPassword").doesNotExist())
-                                .andExpect(jsonPath("$.users[1].password").doesNotExist())
-                                .andExpect(jsonPath("$.users[1].hashedPassword").doesNotExist());
+                                .andExpect(jsonPath("$[0].password").doesNotExist())
+                                .andExpect(jsonPath("$[0].hashedPassword").doesNotExist())
+                                .andExpect(jsonPath("$[1].password").doesNotExist())
+                                .andExpect(jsonPath("$[1].hashedPassword").doesNotExist());
         }
 
         @Test
@@ -232,8 +232,8 @@ public class UserIntegrationTest {
                 mockMvc.perform(get("/api/users")
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.users", hasSize(1)))
-                                .andExpect(jsonPath("$.users[0].firstName", is("John")));
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].firstName", is("John")));
         }
 
         @Test
@@ -246,14 +246,14 @@ public class UserIntegrationTest {
                 mockMvc.perform(get("/api/users")
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.users", hasSize(1)))
-                                .andExpect(jsonPath("$.users[0].firstName", is("John")));
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].firstName", is("John")));
 
                 mockMvc.perform(get("/api/users")
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token2))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.users", hasSize(1)))
-                                .andExpect(jsonPath("$.users[0].firstName", is("Jane")));
+                                .andExpect(jsonPath("$", hasSize(1)))
+                                .andExpect(jsonPath("$[0].firstName", is("Jane")));
         }
 
         @Test
@@ -294,7 +294,7 @@ public class UserIntegrationTest {
         }
 
         private String createUserAndGetToken(String email, String firstName, String lastName) throws Exception {
-                RegisterUserRequest request = new RegisterUserRequest(firstName, lastName, email, "password123");
+                RegisterRequest request = new RegisterRequest(firstName, lastName, email, "password123");
 
                 String responseContent = mockMvc.perform(post("/api/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)

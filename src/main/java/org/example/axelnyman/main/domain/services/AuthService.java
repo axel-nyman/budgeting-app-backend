@@ -2,10 +2,10 @@ package org.example.axelnyman.main.domain.services;
 
 import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
-import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
-import org.example.axelnyman.main.domain.dtos.UserDtos.AuthResponseDto;
-import org.example.axelnyman.main.domain.extensions.AuthExtensions;
+import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.AuthResponse;
+import org.example.axelnyman.main.domain.extensions.UserExtensions;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
@@ -30,7 +30,7 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public AuthResponseDto registerUser(RegisterUserRequest request) {
+    public AuthResponse registerUser(RegisterRequest request) {
         boolean exists = dataService.userExistsByEmailIncludingDeleted(request.email());
         if (exists) {
             throw new DuplicateEmailException("User with email " + request.email() + " already exists");
@@ -58,12 +58,12 @@ public class AuthService implements IAuthService {
                 savedUser.getHousehold().getId(),
                 savedUser.getEmail());
 
-        return AuthExtensions.toAuthResponse(token, savedUser);
+        return UserExtensions.toAuthResponse(token, savedUser);
     }
 
     @Override
-    public AuthResponseDto login(LoginDto loginDto) {
-        Optional<User> userOptional = dataService.findActiveUserByEmail(loginDto.email());
+    public AuthResponse login(LoginRequest loginRequest) {
+        Optional<User> userOptional = dataService.findActiveUserByEmail(loginRequest.email());
 
         if (userOptional.isEmpty()) {
             throw new InvalidCredentialsException("Invalid credentials");
@@ -71,7 +71,7 @@ public class AuthService implements IAuthService {
 
         User user = userOptional.get();
 
-        if (!passwordEncoder.matches(loginDto.password(), user.getHashedPassword())) {
+        if (!passwordEncoder.matches(loginRequest.password(), user.getHashedPassword())) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
@@ -81,6 +81,6 @@ public class AuthService implements IAuthService {
                 user.getHousehold().getId(),
                 user.getEmail());
 
-        return AuthExtensions.toAuthResponse(token, user);
+        return UserExtensions.toAuthResponse(token, user);
     }
 }

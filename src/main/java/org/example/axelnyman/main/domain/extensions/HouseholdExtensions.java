@@ -1,6 +1,6 @@
 package org.example.axelnyman.main.domain.extensions;
 
-import org.example.axelnyman.main.domain.dtos.HouseholdDtos.HouseholdDto;
+import org.example.axelnyman.main.domain.dtos.HouseholdDto.HouseholdResponse;
 import org.example.axelnyman.main.domain.model.Household;
 
 public final class HouseholdExtensions {
@@ -9,8 +9,8 @@ public final class HouseholdExtensions {
         // Prevent instantiation
     }
 
-    public static HouseholdDto toHouseholdDto(Household household) {
-        return new HouseholdDto(
+    public static HouseholdResponse toResponse(Household household) {
+        return new HouseholdResponse(
                 household.getId(),
                 household.getName());
     }

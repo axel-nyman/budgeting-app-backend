@@ -24,8 +24,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.example.axelnyman.main.domain.dtos.UserDtos.RegisterUserRequest;
-import org.example.axelnyman.main.domain.dtos.UserDtos.LoginDto;
+import org.example.axelnyman.main.domain.dtos.UserDto.RegisterRequest;
+import org.example.axelnyman.main.domain.dtos.UserDto.LoginRequest;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
@@ -93,7 +93,7 @@ public class JwtAuthenticationFilterIntegrationTest {
 
     @Test
     void shouldAccessPublicEndpointsWithoutToken() throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "John", "Doe", "john.doe@example.com", "password123");
 
         mockMvc.perform(post("/api/auth/register")
@@ -101,7 +101,7 @@ public class JwtAuthenticationFilterIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
-        LoginDto loginDto = new LoginDto("john.doe@example.com", "password123");
+        LoginRequest loginDto = new LoginRequest("john.doe@example.com", "password123");
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDto)))
@@ -239,7 +239,7 @@ public class JwtAuthenticationFilterIntegrationTest {
     void shouldNotAffectPublicEndpointsWithToken() throws Exception {
         String token = createUserAndGetToken("diana@example.com", "Diana", "Ross");
 
-        RegisterUserRequest request = new RegisterUserRequest(
+        RegisterRequest request = new RegisterRequest(
                 "Elvis", "Presley", "elvis@example.com", "password123");
 
         // Public endpoints should work regardless of token presence
@@ -249,7 +249,7 @@ public class JwtAuthenticationFilterIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
-        LoginDto loginDto = new LoginDto("elvis@example.com", "password123");
+        LoginRequest loginDto = new LoginRequest("elvis@example.com", "password123");
         mockMvc.perform(post("/api/auth/login")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -287,7 +287,7 @@ public class JwtAuthenticationFilterIntegrationTest {
     }
 
     private String createUserAndGetToken(String email, String firstName, String lastName) throws Exception {
-        RegisterUserRequest request = new RegisterUserRequest(firstName, lastName, email, "password123");
+        RegisterRequest request = new RegisterRequest(firstName, lastName, email, "password123");
 
         String responseContent = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
