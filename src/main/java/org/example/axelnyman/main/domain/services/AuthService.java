@@ -4,6 +4,7 @@ import org.example.axelnyman.main.domain.abstracts.IAuthService;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.extensions.UserExtensions;
+import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
 import org.example.axelnyman.main.domain.model.Household;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.shared.exceptions.DuplicateEmailException;
@@ -36,7 +37,7 @@ public class AuthService implements IAuthService {
 
         // Create household first
         String householdName = request.firstName() + " " + request.lastName() + "'s Household";
-        Household household = new Household(householdName);
+        Household household = HouseholdExtensions.toEntity(householdName);
         Household savedHousehold = dataService.saveHousehold(household);
 
         // Create user entity (password hashing handled by User constructor)

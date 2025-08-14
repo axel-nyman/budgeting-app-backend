@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 
@@ -119,7 +120,7 @@ public class UserIntegrationTest {
                 String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
 
                 // Create second user in different household
-                Household household2 = new Household("Different Household");
+                Household household2 = HouseholdExtensions.toEntity("Different Household");
                 Household savedHousehold2 = householdRepository.save(household2);
                 User user2 = new User(
                                 "Jane",
@@ -186,7 +187,7 @@ public class UserIntegrationTest {
                 userRepository.save(user2);
 
                 // Create third user in different household
-                Household household2 = new Household("Different Household");
+                Household household2 = HouseholdExtensions.toEntity("Different Household");
                 Household savedHousehold2 = householdRepository.save(household2);
                 User user3 = new User(
                                 "Bob",

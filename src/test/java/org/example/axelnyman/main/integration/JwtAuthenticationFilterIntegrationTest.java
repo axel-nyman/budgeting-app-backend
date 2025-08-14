@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 import org.example.axelnyman.main.infrastructure.security.JwtTokenProvider;
@@ -187,7 +188,7 @@ public class JwtAuthenticationFilterIntegrationTest {
         );
 
         // Create test user
-        Household household = new Household("Test Household");
+        Household household = HouseholdExtensions.toEntity("Test Household");
         Household savedHousehold = householdRepository.save(household);
         User user = new User("Bob", "Jones", "bob@example.com", "hashedPassword", savedHousehold);
         User savedUser = userRepository.save(user);

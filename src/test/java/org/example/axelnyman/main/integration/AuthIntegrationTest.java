@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 import org.example.axelnyman.main.infrastructure.security.JwtTokenProvider;
@@ -185,7 +186,7 @@ public class AuthIntegrationTest {
     @Test
     void shouldNotRegisterUserWithDuplicateEmail() throws Exception {
         // Create existing user
-        Household household = new Household("Existing Household");
+        Household household = HouseholdExtensions.toEntity("Existing Household");
         Household savedHousehold = householdRepository.save(household);
         
         User existingUser = new User("Jane", "Doe", "jane.doe@example.com", "hashedPassword", savedHousehold);
@@ -240,7 +241,7 @@ public class AuthIntegrationTest {
     @Test
     void shouldLoginWithValidCredentials() throws Exception {
         // Create test user
-        Household household = new Household("Test Household");
+        Household household = HouseholdExtensions.toEntity("Test Household");
         Household savedHousehold = householdRepository.save(household);
         
         String rawPassword = "password123";
@@ -265,7 +266,7 @@ public class AuthIntegrationTest {
     @Test
     void shouldValidateJwtTokenClaimsAfterLogin() throws Exception {
         // Create test user
-        Household household = new Household("JWT Test Household");
+        Household household = HouseholdExtensions.toEntity("JWT Test Household");
         Household savedHousehold = householdRepository.save(household);
         
         String rawPassword = "password123";
@@ -306,7 +307,7 @@ public class AuthIntegrationTest {
     @Test
     void shouldReturnUnauthorizedForInvalidPassword() throws Exception {
         // Create test user
-        Household household = new Household("Password Test Household");
+        Household household = HouseholdExtensions.toEntity("Password Test Household");
         Household savedHousehold = householdRepository.save(household);
         
         String correctPassword = "correctPassword123";
@@ -326,7 +327,7 @@ public class AuthIntegrationTest {
     @Test
     void shouldNotLoginSoftDeletedUser() throws Exception {
         // Create test user
-        Household household = new Household("Deleted User Household");
+        Household household = HouseholdExtensions.toEntity("Deleted User Household");
         Household savedHousehold = householdRepository.save(household);
         
         String rawPassword = "password123";

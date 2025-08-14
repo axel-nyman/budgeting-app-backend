@@ -14,4 +14,8 @@ public final class HouseholdExtensions {
                 household.getId(),
                 household.getName());
     }
+
+    public static Household toEntity(String name) {
+        return new Household(name);
+    }
 }
