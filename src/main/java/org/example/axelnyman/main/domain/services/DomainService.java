@@ -19,23 +19,9 @@ public class DomainService implements IDomainService {
     }
 
     @Override
-    public Optional<UserResponse> getUserById(Long id) {
-        return dataService.getUserById(id)
-                .map(UserExtensions::toResponse);
-    }
-
-    @Override
     public Optional<UserResponse> getUserByIdInHousehold(Long id, Long householdId) {
         return dataService.getActiveUserByIdAndHouseholdId(id, householdId)
                 .map(UserExtensions::toResponse);
-    }
-
-    @Override
-    public List<UserResponse> getAllUsers() {
-        return dataService.getAllUsers()
-                .stream()
-                .map(UserExtensions::toResponse)
-                .toList();
     }
 
     @Override

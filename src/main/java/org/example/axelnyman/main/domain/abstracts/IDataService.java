@@ -20,15 +20,11 @@ public interface IDataService {
 
     boolean deleteUserById(Long id);
 
-    boolean userExistsByEmail(String email);
-
     boolean userExistsByEmailIncludingDeleted(String email);
 
     Optional<User> findActiveUserByEmail(String email);
 
     Household saveHousehold(Household household);
-
-    Optional<Household> getHouseholdById(Long id);
 
     List<User> getActiveUsersByHouseholdId(Long householdId);
 

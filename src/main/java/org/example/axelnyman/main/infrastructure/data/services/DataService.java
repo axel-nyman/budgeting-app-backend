@@ -37,11 +37,6 @@ public class DataService implements IDataService {
     }
 
     @Override
-    public boolean userExistsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
-    @Override
     public boolean deleteUserById(Long id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
@@ -63,11 +58,6 @@ public class DataService implements IDataService {
     @Override
     public Household saveHousehold(Household household) {
         return householdRepository.save(household);
-    }
-
-    @Override
-    public Optional<Household> getHouseholdById(Long id) {
-        return householdRepository.findById(id);
     }
 
     @Override
