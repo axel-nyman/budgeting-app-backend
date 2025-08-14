@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -13,6 +14,8 @@ import java.util.Set;
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 public final class User {
+
+    private static PasswordEncoder passwordEncoder;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,20 +55,26 @@ public final class User {
     public User() {
     }
 
-    // Constructor for registration
-    public User(String firstName, String lastName, String email) {
+    // Constructor for full user creation with password and household (with raw
+    // password)
+    public User(String firstName, String lastName, String email, String rawPassword, Household household) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.hashedPassword = hashPassword(rawPassword);
+        this.household = household;
     }
 
-    // Constructor for full user creation with password and household
-    public User(String firstName, String lastName, String email, String hashedPassword, Household household) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.hashedPassword = hashedPassword;
-        this.household = household;
+    public static void setPasswordEncoder(PasswordEncoder encoder) {
+        passwordEncoder = encoder;
+    }
+
+    private String hashPassword(String rawPassword) {
+        if (passwordEncoder == null) {
+            throw new IllegalStateException(
+                    "PasswordEncoder not set. Make sure User.setPasswordEncoder() is called during application startup.");
+        }
+        return passwordEncoder.encode(rawPassword);
     }
 
     // Getters and Setters

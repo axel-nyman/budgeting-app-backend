@@ -39,14 +39,8 @@ public class AuthService implements IAuthService {
         Household household = new Household(householdName);
         Household savedHousehold = dataService.saveHousehold(household);
 
-        // Create user with hashed password and household reference
-        String hashedPassword = passwordEncoder.encode(request.password());
-        User user = new User(
-                request.firstName(),
-                request.lastName(),
-                request.email(),
-                hashedPassword,
-                savedHousehold);
+        // Create user entity (password hashing handled by User constructor)
+        User user = UserExtensions.toEntity(request, savedHousehold);
 
         User savedUser = dataService.saveUser(user);
 

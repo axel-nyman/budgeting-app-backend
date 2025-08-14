@@ -244,8 +244,7 @@ public class AuthIntegrationTest {
         Household savedHousehold = householdRepository.save(household);
         
         String rawPassword = "password123";
-        String hashedPassword = passwordEncoder.encode(rawPassword);
-        User user = new User("John", "Doe", "john.doe@example.com", hashedPassword, savedHousehold);
+        User user = new User("John", "Doe", "john.doe@example.com", rawPassword, savedHousehold);
         User savedUser = userRepository.save(user);
 
         LoginRequest loginDto = new LoginRequest("john.doe@example.com", rawPassword);
@@ -270,8 +269,7 @@ public class AuthIntegrationTest {
         Household savedHousehold = householdRepository.save(household);
         
         String rawPassword = "password123";
-        String hashedPassword = passwordEncoder.encode(rawPassword);
-        User user = new User("Jane", "Smith", "jane.smith@example.com", hashedPassword, savedHousehold);
+        User user = new User("Jane", "Smith", "jane.smith@example.com", rawPassword, savedHousehold);
         User savedUser = userRepository.save(user);
 
         LoginRequest loginDto = new LoginRequest("jane.smith@example.com", rawPassword);
