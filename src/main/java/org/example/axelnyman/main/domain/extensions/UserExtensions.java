@@ -16,12 +16,21 @@ public final class UserExtensions {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-                HouseholdExtensions.toResponse(user.getHousehold()),
+                HouseholdExtensions.toSimpleResponse(user.getHousehold()),
                 user.getCreatedAt());
     }
 
     public static AuthResponse toAuthResponse(String token, User user) {
         return new AuthResponse(token, toResponse(user));
+    }
+
+    public static UserMemberResponse toMemberResponse(User user) {
+        return new UserMemberResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getCreatedAt());
     }
 
     public static User toEntity(RegisterRequest request, Household household) {

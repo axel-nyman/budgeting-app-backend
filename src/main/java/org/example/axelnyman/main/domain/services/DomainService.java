@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.*;
+import org.example.axelnyman.main.domain.dtos.HouseholdDtos.*;
 import org.example.axelnyman.main.domain.extensions.UserExtensions;
+import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,5 +43,11 @@ public class DomainService implements IDomainService {
                 .stream()
                 .map(UserExtensions::toResponse)
                 .toList();
+    }
+
+    @Override
+    public Optional<HouseholdResponse> getHouseholdDetails(Long householdId) {
+        return dataService.getHouseholdWithActiveMembers(householdId)
+                .map(HouseholdExtensions::toResponse);
     }
 }

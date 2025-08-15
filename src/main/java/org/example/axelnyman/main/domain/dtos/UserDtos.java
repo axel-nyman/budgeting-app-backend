@@ -38,12 +38,20 @@ public class UserDtos {
             String firstName,
             String lastName,
             String email,
-            HouseholdDtos.HouseholdResponse household,
+            HouseholdDtos.SimpleHouseholdResponse household,
             LocalDateTime createdAt
     ) {}
 
     public record AuthResponse(
             String token,
             UserResponse user
+    ) {}
+
+    public record UserMemberResponse(
+            Long id,
+            String firstName,
+            String lastName,
+            String email,
+            LocalDateTime joinedAt
     ) {}
 }
