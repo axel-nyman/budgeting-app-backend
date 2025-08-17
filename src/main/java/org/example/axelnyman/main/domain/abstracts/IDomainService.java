@@ -23,4 +23,6 @@ public interface IDomainService {
     List<UserResponse> getHouseholdUsers(Long householdId);
 
     Optional<HouseholdResponse> getHouseholdDetails(Long householdId);
+
+    HouseholdUpdateResponse updateHouseholdName(Long householdId, String name);
 }

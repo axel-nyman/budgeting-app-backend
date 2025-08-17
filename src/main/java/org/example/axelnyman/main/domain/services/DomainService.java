@@ -9,6 +9,8 @@ import org.example.axelnyman.main.domain.dtos.UserDtos.*;
 import org.example.axelnyman.main.domain.dtos.HouseholdDtos.*;
 import org.example.axelnyman.main.domain.extensions.UserExtensions;
 import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
+import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.shared.exceptions.HouseholdNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,5 +51,19 @@ public class DomainService implements IDomainService {
     public Optional<HouseholdResponse> getHouseholdDetails(Long householdId) {
         return dataService.getHouseholdWithActiveMembers(householdId)
                 .map(HouseholdExtensions::toResponse);
+    }
+
+    @Override
+    public HouseholdUpdateResponse updateHouseholdName(Long householdId, String name) {
+        // Get household
+        Household household = dataService.getHouseholdById(householdId)
+                .orElseThrow(() -> new HouseholdNotFoundException("Household not found"));
+
+        // Update name (trim for consistent formatting)
+        household.setName(name.trim());
+        
+        // Save and return
+        Household savedHousehold = dataService.saveHousehold(household);
+        return HouseholdExtensions.toUpdateResponse(savedHousehold);
     }
 }

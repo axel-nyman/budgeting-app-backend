@@ -37,6 +37,14 @@ public final class HouseholdExtensions {
                 activeUsers.size());
     }
 
+    public static HouseholdUpdateResponse toUpdateResponse(Household household) {
+        return new HouseholdUpdateResponse(
+                household.getId(),
+                household.getName(),
+                household.getCreatedAt(),
+                household.getUpdatedAt());
+    }
+
     public static Household toEntity(String name) {
         return new Household(name);
     }

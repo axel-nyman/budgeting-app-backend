@@ -1,6 +1,8 @@
 package org.example.axelnyman.main.domain.dtos;
 
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserMemberResponse;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,5 +20,18 @@ public class HouseholdDtos {
             LocalDateTime createdAt,
             List<UserMemberResponse> members,
             Integer memberCount
+    ) {}
+
+    public record UpdateHouseholdRequest(
+            @NotBlank(message = "Name cannot be empty")
+            @Size(max = 100, message = "Name cannot exceed 100 characters")
+            String name
+    ) {}
+
+    public record HouseholdUpdateResponse(
+            Long id,
+            String name,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
     ) {}
 }

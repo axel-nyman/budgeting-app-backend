@@ -217,6 +217,122 @@ public class HouseholdIntegrationTest {
                                 .andExpect(jsonPath("$.members", hasSize(5)));
         }
 
+        @Test
+        void shouldRenameHouseholdSuccessfully() throws Exception {
+                // Create user and household
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+
+                // Test PUT /api/households
+                mockMvc.perform(put("/api/households")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", "New Family Name"))))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id", notNullValue()))
+                                .andExpect(jsonPath("$.name", is("New Family Name")))
+                                .andExpect(jsonPath("$.createdAt", notNullValue()))
+                                .andExpect(jsonPath("$.updatedAt", notNullValue()));
+        }
+
+        @Test
+        void shouldRejectEmptyHouseholdName() throws Exception {
+                // Create user and household
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+
+                // Test with empty name
+                mockMvc.perform(put("/api/households")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", ""))))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error", is("Invalid household name")))
+                                .andExpect(jsonPath("$.details.name[0]", is("Name cannot be empty")));
+        }
+
+        @Test
+        void shouldRejectWhitespaceOnlyHouseholdName() throws Exception {
+                // Create user and household
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+
+                // Test with whitespace-only name
+                mockMvc.perform(put("/api/households")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", "   "))))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error", is("Invalid household name")))
+                                .andExpect(jsonPath("$.details.name[0]", is("Name cannot be empty")));
+        }
+
+        @Test
+        void shouldRejectTooLongHouseholdName() throws Exception {
+                // Create user and household
+                String token = createUserAndGetToken("john.doe@example.com", "John", "Doe");
+
+                // Create a name longer than 100 characters
+                String longName = "a".repeat(101);
+
+                // Test with too long name
+                mockMvc.perform(put("/api/households")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", longName))))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.error", is("Invalid household name")))
+                                .andExpect(jsonPath("$.details.name[0]", is("Name cannot exceed 100 characters")));
+        }
+
+        @Test
+        void shouldReturn401WhenNotAuthenticatedForRename() throws Exception {
+                // Test PUT /api/households without token
+                mockMvc.perform(put("/api/households")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", "New Name"))))
+                                .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void shouldOnlyAllowRenamingOwnHousehold() throws Exception {
+                // Create first user in first household
+                String token1 = createUserAndGetToken("user1@example.com", "User", "One");
+                User user1 = userRepository.findActiveByEmail("user1@example.com").orElseThrow();
+                Household household1 = user1.getHousehold();
+
+                // Create second user in second household  
+                String token2 = createUserAndGetToken("user2@example.com", "User", "Two");
+                User user2 = userRepository.findActiveByEmail("user2@example.com").orElseThrow();
+                Household household2 = user2.getHousehold();
+
+                // User 1 renames their household
+                mockMvc.perform(put("/api/households")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", "User1 Family"))))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.name", is("User1 Family")));
+
+                // User 2 renames their household  
+                mockMvc.perform(put("/api/households")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token2)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(Map.of("name", "User2 Family"))))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.name", is("User2 Family")));
+
+                // Verify that each user only affected their own household
+                Household refreshedHousehold1 = householdRepository.findById(household1.getId()).orElseThrow();
+                Household refreshedHousehold2 = householdRepository.findById(household2.getId()).orElseThrow();
+
+                // Household 1 should be renamed by User 1
+                assert refreshedHousehold1.getName().equals("User1 Family");
+                
+                // Household 2 should be renamed by User 2
+                assert refreshedHousehold2.getName().equals("User2 Family");
+
+                // Verify households remain separate (User 1 didn't affect User 2's household and vice versa)
+                assert !refreshedHousehold1.getId().equals(refreshedHousehold2.getId());
+        }
+
         private String createUserAndGetToken(String email, String firstName, String lastName) throws Exception {
                 // Create household first
                 Household household = HouseholdExtensions.toEntity("Test Household");
