@@ -6,11 +6,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
+import org.example.axelnyman.main.domain.dtos.HouseholdDtos.CreateInvitationRequest;
 import org.example.axelnyman.main.domain.dtos.HouseholdDtos.HouseholdResponse;
 import org.example.axelnyman.main.domain.dtos.HouseholdDtos.HouseholdUpdateResponse;
+import org.example.axelnyman.main.domain.dtos.HouseholdDtos.InvitationResponse;
 import org.example.axelnyman.main.domain.dtos.HouseholdDtos.UpdateHouseholdRequest;
 import org.example.axelnyman.main.infrastructure.security.CurrentUser;
 import org.example.axelnyman.main.infrastructure.security.UserPrincipal;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -55,5 +58,23 @@ public class HouseholdController {
                 currentUser.getHouseholdId(), 
                 request.name());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/households/invitations")
+    @Operation(summary = "Create household invitation", description = "Invite another user to join the household by email address")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Invitation created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request or user already in household"),
+            @ApiResponse(responseCode = "401", description = "Authentication required"),
+            @ApiResponse(responseCode = "404", description = "User with this email not found")
+    })
+    public ResponseEntity<InvitationResponse> createInvitation(
+            @CurrentUser UserPrincipal currentUser,
+            @Valid @RequestBody CreateInvitationRequest request) {
+        InvitationResponse response = domainService.createHouseholdInvitation(
+                currentUser.getHouseholdId(),
+                currentUser.getUserId(),
+                request.email());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

@@ -10,7 +10,12 @@ import org.example.axelnyman.main.domain.dtos.HouseholdDtos.*;
 import org.example.axelnyman.main.domain.extensions.UserExtensions;
 import org.example.axelnyman.main.domain.extensions.HouseholdExtensions;
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.model.HouseholdInvitation;
+import org.example.axelnyman.main.domain.model.User;
 import org.example.axelnyman.main.shared.exceptions.HouseholdNotFoundException;
+import org.example.axelnyman.main.shared.exceptions.InvitationAlreadyExistsException;
+import org.example.axelnyman.main.shared.exceptions.UserAlreadyInHouseholdException;
+import org.example.axelnyman.main.shared.exceptions.UserNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -65,5 +70,46 @@ public class DomainService implements IDomainService {
         // Save and return
         Household savedHousehold = dataService.saveHousehold(household);
         return HouseholdExtensions.toUpdateResponse(savedHousehold);
+    }
+
+    @Override
+    public InvitationResponse createHouseholdInvitation(Long householdId, Long invitedByUserId, String email) {
+        validateInvitationRequest(householdId, invitedByUserId, email);
+        HouseholdInvitation invitation = buildInvitation(householdId, invitedByUserId, email);
+        return saveAndReturnInvitation(invitation);
+    }
+
+    private void validateInvitationRequest(Long householdId, Long invitedByUserId, String email) {
+        // Find user by email
+        User invitedUser = dataService.findActiveUserByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with this email not found"));
+
+        // Check if user is already in the same household
+        if (invitedUser.getHousehold() != null && invitedUser.getHousehold().getId().equals(householdId)) {
+            throw new UserAlreadyInHouseholdException("User already belongs to your household");
+        }
+
+        // Check for existing active invitation
+        Optional<HouseholdInvitation> existingInvitation = dataService.findActiveInvitationByHouseholdAndUser(householdId, invitedUser.getId());
+        if (existingInvitation.isPresent()) {
+            throw new InvitationAlreadyExistsException("Active invitation already exists for this user");
+        }
+    }
+
+    private HouseholdInvitation buildInvitation(Long householdId, Long invitedByUserId, String email) {
+        // Get required entities
+        User invitedUser = dataService.findActiveUserByEmail(email).orElseThrow();
+        Household household = dataService.getHouseholdById(householdId)
+                .orElseThrow(() -> new HouseholdNotFoundException("Household not found"));
+        User invitedByUser = dataService.getUserById(invitedByUserId)
+                .orElseThrow(() -> new UserNotFoundException("Inviting user not found"));
+
+        // Create invitation entity
+        return HouseholdExtensions.toInvitationEntity(household, invitedUser, invitedByUser);
+    }
+
+    private InvitationResponse saveAndReturnInvitation(HouseholdInvitation invitation) {
+        HouseholdInvitation savedInvitation = dataService.saveHouseholdInvitation(invitation);
+        return HouseholdExtensions.toInvitationResponse(savedInvitation);
     }
 }

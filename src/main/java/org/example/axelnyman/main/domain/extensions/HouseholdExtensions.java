@@ -3,9 +3,12 @@ package org.example.axelnyman.main.domain.extensions;
 import org.example.axelnyman.main.domain.dtos.HouseholdDtos.*;
 import org.example.axelnyman.main.domain.dtos.UserDtos.UserMemberResponse;
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.model.HouseholdInvitation;
 import org.example.axelnyman.main.domain.model.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class HouseholdExtensions {
@@ -47,5 +50,25 @@ public final class HouseholdExtensions {
 
     public static Household toEntity(String name) {
         return new Household(name);
+    }
+
+    public static HouseholdInvitation toInvitationEntity(Household household, User invitedUser, User invitedByUser) {
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(7);
+        return new HouseholdInvitation(household, invitedUser, invitedByUser, token, expiresAt);
+    }
+
+    public static InvitationResponse toInvitationResponse(HouseholdInvitation invitation) {
+        UserMemberResponse inviterDetails = UserExtensions.toMemberResponse(invitation.getInvitedByUser());
+
+        return new InvitationResponse(
+                invitation.getId(),
+                invitation.getHousehold().getId(),
+                invitation.getHousehold().getName(),
+                invitation.getInvitedUser().getEmail(),
+                inviterDetails,
+                invitation.getExpiresAt(),
+                invitation.getStatus().toString()
+        );
     }
 }

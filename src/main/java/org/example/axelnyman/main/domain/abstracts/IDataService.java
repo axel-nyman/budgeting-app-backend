@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.model.HouseholdInvitation;
 import org.example.axelnyman.main.domain.model.User;
 
 /**
@@ -33,4 +34,10 @@ public interface IDataService {
     Optional<Household> getHouseholdWithActiveMembers(Long householdId);
 
     Optional<Household> getHouseholdById(Long householdId);
+
+    HouseholdInvitation saveHouseholdInvitation(HouseholdInvitation invitation);
+
+    Optional<HouseholdInvitation> findActiveInvitationByHouseholdAndUser(Long householdId, Long invitedUserId);
+
+    Optional<HouseholdInvitation> findInvitationByToken(String token);
 }

@@ -25,4 +25,6 @@ public interface IDomainService {
     Optional<HouseholdResponse> getHouseholdDetails(Long householdId);
 
     HouseholdUpdateResponse updateHouseholdName(Long householdId, String name);
+
+    InvitationResponse createHouseholdInvitation(Long householdId, Long invitedByUserId, String email);
 }

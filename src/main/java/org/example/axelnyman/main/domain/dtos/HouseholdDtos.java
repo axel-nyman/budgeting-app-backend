@@ -34,4 +34,20 @@ public class HouseholdDtos {
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {}
+
+    public record CreateInvitationRequest(
+            @NotBlank(message = "Email is required")
+            @jakarta.validation.constraints.Email(message = "Email should be valid")
+            String email
+    ) {}
+
+    public record InvitationResponse(
+            Long id,
+            Long householdId,
+            String householdName,
+            String invitedEmail,
+            UserMemberResponse invitedBy,
+            LocalDateTime expiresAt,
+            String status
+    ) {}
 }

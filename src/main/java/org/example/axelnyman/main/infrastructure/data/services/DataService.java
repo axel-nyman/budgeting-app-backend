@@ -5,7 +5,10 @@ import java.util.Optional;
 
 import org.example.axelnyman.main.domain.abstracts.IDataService;
 import org.example.axelnyman.main.domain.model.Household;
+import org.example.axelnyman.main.domain.model.HouseholdInvitation;
+import org.example.axelnyman.main.domain.model.HouseholdInvitation.InvitationStatus;
 import org.example.axelnyman.main.domain.model.User;
+import org.example.axelnyman.main.infrastructure.data.context.HouseholdInvitationRepository;
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.springframework.stereotype.Service;
@@ -15,10 +18,12 @@ public class DataService implements IDataService {
 
     private final UserRepository userRepository;
     private final HouseholdRepository householdRepository;
+    private final HouseholdInvitationRepository householdInvitationRepository;
 
-    public DataService(UserRepository userRepository, HouseholdRepository householdRepository) {
+    public DataService(UserRepository userRepository, HouseholdRepository householdRepository, HouseholdInvitationRepository householdInvitationRepository) {
         this.userRepository = userRepository;
         this.householdRepository = householdRepository;
+        this.householdInvitationRepository = householdInvitationRepository;
     }
 
     @Override
@@ -78,5 +83,20 @@ public class DataService implements IDataService {
     @Override
     public Optional<Household> getHouseholdById(Long householdId) {
         return householdRepository.findById(householdId);
+    }
+
+    @Override
+    public HouseholdInvitation saveHouseholdInvitation(HouseholdInvitation invitation) {
+        return householdInvitationRepository.save(invitation);
+    }
+
+    @Override
+    public Optional<HouseholdInvitation> findActiveInvitationByHouseholdAndUser(Long householdId, Long invitedUserId) {
+        return householdInvitationRepository.findActiveByHouseholdAndInvitedUser(householdId, invitedUserId, InvitationStatus.PENDING);
+    }
+
+    @Override
+    public Optional<HouseholdInvitation> findInvitationByToken(String token) {
+        return householdInvitationRepository.findByToken(token);
     }
 }
