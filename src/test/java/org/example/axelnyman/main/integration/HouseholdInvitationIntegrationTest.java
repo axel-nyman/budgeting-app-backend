@@ -419,9 +419,8 @@ public class HouseholdInvitationIntegrationTest {
         mockMvc.perform(get("/api/users/me/invitations")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + invitedToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2))) // Current implementation returns both - this exposes the issue
-                .andExpect(jsonPath("$[0].id", anyOf(is(validInvitation.getId().intValue()), is(expiredInvitation.getId().intValue()))))
-                .andExpect(jsonPath("$[1].id", anyOf(is(validInvitation.getId().intValue()), is(expiredInvitation.getId().intValue()))));
+                .andExpect(jsonPath("$", hasSize(1))) // Now should return only valid invitation
+                .andExpect(jsonPath("$[0].id", is(validInvitation.getId().intValue())));
     }
 
     @Test
@@ -506,6 +505,41 @@ public class HouseholdInvitationIntegrationTest {
         // This test will help identify if the system properly handles expiration logic
         result.andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
               .andExpect(jsonPath("$[*].status", everyItem(is("PENDING"))));
+    }
+
+    @Test
+    void shouldAutomaticallyExpireInvitationsAndUpdateStatus() throws Exception {
+        // Create user who will receive invitations
+        String invitedToken = createUserAndGetToken("invited@example.com", "Jane", "Smith");
+        User invitedUser = userRepository.findActiveByEmail("invited@example.com").orElseThrow();
+        
+        // Remove household association to simulate user not in any household  
+        invitedUser.setHousehold(null);
+        userRepository.save(invitedUser);
+
+        // Create inviter
+        createUserAndGetToken("inviter@example.com", "John", "Doe");
+        User inviter = userRepository.findActiveByEmail("inviter@example.com").orElseThrow();
+
+        // Create an expired invitation (past expiration date but still PENDING status)
+        HouseholdInvitation expiredInvitation = HouseholdExtensions.toInvitationEntity(
+                inviter.getHousehold(), invitedUser, inviter);
+        expiredInvitation.setExpiresAt(LocalDateTime.now().minusHours(1)); // Expired 1 hour ago
+        householdInvitationRepository.save(expiredInvitation);
+
+        // Verify invitation is initially PENDING
+        HouseholdInvitation savedInvitation = householdInvitationRepository.findById(expiredInvitation.getId()).orElseThrow();
+        assertEquals(HouseholdInvitation.InvitationStatus.PENDING, savedInvitation.getStatus());
+
+        // Get user's pending invitations - this should trigger automatic expiration
+        mockMvc.perform(get("/api/users/me/invitations")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + invitedToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0))); // Should return empty list
+
+        // Verify the invitation status was automatically updated to EXPIRED
+        HouseholdInvitation updatedInvitation = householdInvitationRepository.findById(expiredInvitation.getId()).orElseThrow();
+        assertEquals(HouseholdInvitation.InvitationStatus.EXPIRED, updatedInvitation.getStatus());
     }
 
     private String createUserAndGetToken(String email, String firstName, String lastName) throws Exception {

@@ -1,5 +1,6 @@
 package org.example.axelnyman.main.infrastructure.data.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.example.axelnyman.main.infrastructure.data.context.HouseholdInvitatio
 import org.example.axelnyman.main.infrastructure.data.context.HouseholdRepository;
 import org.example.axelnyman.main.infrastructure.data.context.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DataService implements IDataService {
@@ -20,7 +22,8 @@ public class DataService implements IDataService {
     private final HouseholdRepository householdRepository;
     private final HouseholdInvitationRepository householdInvitationRepository;
 
-    public DataService(UserRepository userRepository, HouseholdRepository householdRepository, HouseholdInvitationRepository householdInvitationRepository) {
+    public DataService(UserRepository userRepository, HouseholdRepository householdRepository,
+            HouseholdInvitationRepository householdInvitationRepository) {
         this.userRepository = userRepository;
         this.householdRepository = householdRepository;
         this.householdInvitationRepository = householdInvitationRepository;
@@ -34,11 +37,6 @@ public class DataService implements IDataService {
     @Override
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
     }
 
     @Override
@@ -92,16 +90,26 @@ public class DataService implements IDataService {
 
     @Override
     public Optional<HouseholdInvitation> findActiveInvitationByHouseholdAndUser(Long householdId, Long invitedUserId) {
-        return householdInvitationRepository.findActiveByHouseholdAndInvitedUser(householdId, invitedUserId, InvitationStatus.PENDING);
+        return householdInvitationRepository.findActiveByHouseholdAndInvitedUser(householdId, invitedUserId,
+                InvitationStatus.PENDING);
     }
 
     @Override
-    public Optional<HouseholdInvitation> findInvitationByToken(String token) {
-        return householdInvitationRepository.findByToken(token);
+    @Transactional
+    public int expireOutdatedInvitations() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        return householdInvitationRepository.updateExpiredInvitationsToExpired(
+                InvitationStatus.EXPIRED,
+                InvitationStatus.PENDING,
+                currentTime);
     }
 
     @Override
-    public List<HouseholdInvitation> getPendingInvitationsForUser(Long userId) {
-        return householdInvitationRepository.findByInvitedUserAndStatus(userId, InvitationStatus.PENDING);
+    public List<HouseholdInvitation> getPendingNonExpiredInvitationsForUser(Long userId) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        return householdInvitationRepository.findPendingNonExpiredByInvitedUser(
+                userId,
+                InvitationStatus.PENDING,
+                currentTime);
     }
 }

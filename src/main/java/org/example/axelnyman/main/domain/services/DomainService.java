@@ -17,6 +17,7 @@ import org.example.axelnyman.main.shared.exceptions.InvitationAlreadyExistsExcep
 import org.example.axelnyman.main.shared.exceptions.UserAlreadyInHouseholdException;
 import org.example.axelnyman.main.shared.exceptions.UserNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DomainService implements IDomainService {
@@ -114,8 +115,13 @@ public class DomainService implements IDomainService {
     }
 
     @Override
+    @Transactional
     public List<InvitationResponse> getUserPendingInvitations(Long userId) {
-        return dataService.getPendingInvitationsForUser(userId)
+        // First, expire any outdated invitations
+        dataService.expireOutdatedInvitations();
+        
+        // Then fetch only pending non-expired invitations
+        return dataService.getPendingNonExpiredInvitationsForUser(userId)
                 .stream()
                 .map(HouseholdExtensions::toInvitationResponse)
                 .toList();

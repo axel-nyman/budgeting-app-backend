@@ -17,8 +17,6 @@ public interface IDataService {
 
     Optional<User> getUserById(Long id);
 
-    List<User> getAllUsers();
-
     boolean deleteUserById(Long id);
 
     boolean userExistsByEmailIncludingDeleted(String email);
@@ -39,7 +37,7 @@ public interface IDataService {
 
     Optional<HouseholdInvitation> findActiveInvitationByHouseholdAndUser(Long householdId, Long invitedUserId);
 
-    Optional<HouseholdInvitation> findInvitationByToken(String token);
+    int expireOutdatedInvitations();
 
-    List<HouseholdInvitation> getPendingInvitationsForUser(Long userId);
+    List<HouseholdInvitation> getPendingNonExpiredInvitationsForUser(Long userId);
 }
