@@ -30,6 +30,7 @@ Authorization: Bearer <your-jwt-token>
 - `GET /api/users/me` - Get current user profile
 - `GET /api/users/{id}` - Get user by ID  
 - `GET /api/users` - Get household users
+- `GET /api/users/me/invitations` - Get pending household invitations
 - `DELETE /api/users/{id}` - Delete user
 
 ### 📚 Complete API Documentation

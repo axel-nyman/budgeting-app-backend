@@ -40,4 +40,6 @@ public interface IDataService {
     Optional<HouseholdInvitation> findActiveInvitationByHouseholdAndUser(Long householdId, Long invitedUserId);
 
     Optional<HouseholdInvitation> findInvitationByToken(String token);
+
+    List<HouseholdInvitation> getPendingInvitationsForUser(Long userId);
 }

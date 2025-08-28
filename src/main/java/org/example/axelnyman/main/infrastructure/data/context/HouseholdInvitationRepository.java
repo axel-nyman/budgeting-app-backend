@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,4 +20,12 @@ public interface HouseholdInvitationRepository extends JpaRepository<HouseholdIn
             @Param("status") InvitationStatus status);
 
     Optional<HouseholdInvitation> findByToken(String token);
+
+    @Query("SELECT hi FROM HouseholdInvitation hi " +
+           "WHERE hi.invitedUser.id = :invitedUserId " +
+           "AND hi.status = :status " +
+           "ORDER BY hi.createdAt DESC")
+    List<HouseholdInvitation> findByInvitedUserAndStatus(
+            @Param("invitedUserId") Long invitedUserId, 
+            @Param("status") InvitationStatus status);
 }

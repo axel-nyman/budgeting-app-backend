@@ -112,4 +112,12 @@ public class DomainService implements IDomainService {
         HouseholdInvitation savedInvitation = dataService.saveHouseholdInvitation(invitation);
         return HouseholdExtensions.toInvitationResponse(savedInvitation);
     }
+
+    @Override
+    public List<InvitationResponse> getUserPendingInvitations(Long userId) {
+        return dataService.getPendingInvitationsForUser(userId)
+                .stream()
+                .map(HouseholdExtensions::toInvitationResponse)
+                .toList();
+    }
 }

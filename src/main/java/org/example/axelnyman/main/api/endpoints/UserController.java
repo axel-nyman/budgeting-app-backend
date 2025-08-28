@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.axelnyman.main.domain.abstracts.IDomainService;
 import org.example.axelnyman.main.domain.dtos.UserDtos.*;
+import org.example.axelnyman.main.domain.dtos.HouseholdDtos.*;
 import org.example.axelnyman.main.infrastructure.security.CurrentUser;
 import org.example.axelnyman.main.infrastructure.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -75,5 +76,16 @@ public class UserController {
         return deleted
                 ? ResponseEntity.noContent().<Void>build()
                 : ResponseEntity.notFound().<Void>build();
+    }
+
+    @GetMapping("/users/me/invitations")
+    @Operation(summary = "Get user's pending invitations", description = "Retrieve all pending household invitations for the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pending invitations retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    public ResponseEntity<List<InvitationResponse>> getUserInvitations(@CurrentUser UserPrincipal currentUser) {
+        List<InvitationResponse> invitations = domainService.getUserPendingInvitations(currentUser.getUserId());
+        return ResponseEntity.ok(invitations);
     }
 }

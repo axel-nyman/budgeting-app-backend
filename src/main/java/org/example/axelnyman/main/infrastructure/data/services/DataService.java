@@ -99,4 +99,9 @@ public class DataService implements IDataService {
     public Optional<HouseholdInvitation> findInvitationByToken(String token) {
         return householdInvitationRepository.findByToken(token);
     }
+
+    @Override
+    public List<HouseholdInvitation> getPendingInvitationsForUser(Long userId) {
+        return householdInvitationRepository.findByInvitedUserAndStatus(userId, InvitationStatus.PENDING);
+    }
 }
